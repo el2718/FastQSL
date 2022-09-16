@@ -13,14 +13,17 @@ Usage: please see the beginning of qfactor.pro
 ```bibtex
 @ARTICLE{2022arXiv220812569Z,
        author = {{Zhang}, Peijin and {Chen}, Jun and {Liu}, Rui and {Wang}, Chuanbing},
-        title = "{FastQSL: a fast computation method for Quasi-Separatrix Layers}",
+        title = "{FastQSL: A Fast Computation Method for Quasi-separatrix Layers}",
       journal = {arXiv e-prints},
+     keywords = {Astrophysics - Solar and Stellar Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics},
          year = 2022,
         month = aug,
           eid = {arXiv:2208.12569},
         pages = {arXiv:2208.12569},
 archivePrefix = {arXiv},
        eprint = {2208.12569},
+ primaryClass = {astro-ph.SR},
        adsurl = {https://ui.adsabs.harvard.edu/abs/2022arXiv220812569Z},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 ```
