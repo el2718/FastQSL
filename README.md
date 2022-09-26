@@ -7,8 +7,7 @@ Usage: please see the beginning of qfactor.pro
 
 ## Cite as
 
-* Zhang, P., Chen, J., Liu, R. and Wang, C., 2022. FastQSL: a fast computation method for Quasi-Separatrix Layers. arXiv preprint arXiv:2208.12569.
-
+* Zhang, P., Chen, J., Liu^*, R. and Wang, C., 2022. FastQSL: a fast computation method for Quasi-Separatrix Layers. The Astrophysical Journal, 937, 26, 2022
 
 ```bibtex
 @ARTICLE{2022ApJ...937...26Z,
