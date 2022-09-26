@@ -8,7 +8,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   or a box volume, given a 3D magnetic field with Cartesian, uniform or stretched grids
 ; 
 ;   For details see:
-;     Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022. FastQSL: a fast computation method for Quasi-Separatrix Layers. The Astrophysical Journal, 937, 26, 2022
+;     Zhang, P., Chen, J.*, Liu, R. and Wang, C., FastQSL: a fast computation method for Quasi-Separatrix Layers. The Astrophysical Journal, 937, 26, 2022
 ;
 ; PROCEDURES USED:
 ; ------IDL procedures used
