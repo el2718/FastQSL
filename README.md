@@ -11,7 +11,7 @@ GDL (https://gnudatalanguage.github.io ,/no_preview should be invoked)
 
 ### for *.f90 files
 ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran)
-or gfortran
+or gfortran (https://gcc.gnu.org/wiki/GFortran)
 
 ## Cite as
 
