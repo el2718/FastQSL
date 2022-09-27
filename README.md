@@ -7,7 +7,7 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 ### for *.pro
 IDL (https://www.l3harrisgeospatial.com/Software-Technology/IDL) or 
 
-GDL (https://gnudatalanguage.github.io); note: GDL has problem of write_png,/no_preview should be invoked)
+GDL (https://gnudatalanguage.github.io); note: GDL has problems of write_png, /no_preview should be invoked.
 
 ### for *.f90
 ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran) or 
