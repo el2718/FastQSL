@@ -5,14 +5,14 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 -----------------------------
 ## Dependencies
 ### For *.pro
-IDL (https://www.l3harrisgeospatial.com/Software-Technology/IDL) or 
+* IDL (https://www.l3harrisgeospatial.com/Software-Technology/IDL) or 
 
-GDL (https://gnudatalanguage.github.io); note: GDL has problems of write_png, /no_preview should be invoked.
+* GDL (https://gnudatalanguage.github.io); note: GDL has problems of write_png, /no_preview should be invoked.
 
 ### For *.f90
-ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran) or 
+* ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran) or 
 
-gfortran (https://gcc.gnu.org/wiki/GFortran)
+* gfortran (https://gcc.gnu.org/wiki/GFortran)
 
 ## Usage
 Please see the beginning of qfactor.pro
