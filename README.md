@@ -16,7 +16,7 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 ## Usage
 Please see the beginning of qfactor.pro
 
-## Another branch with GPU
+## Another branch with python+CUDA/C
 https://github.com/peijin94/FastQSL
 
 ## Cite as
