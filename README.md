@@ -9,7 +9,7 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 
 * GDL https://gnudatalanguage.github.io; 
 
-* * note: GDL has problems of write_png, /no_preview should be invoked.
+  * note: GDL has problems of write_png, /no_preview should be invoked.
 
 ### For *.f90
 * ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran or 
