@@ -5,7 +5,9 @@ Usage: please see the beginning of qfactor.pro
 
 -----------------------------
 ## Dependencies
-IDL or GDL (if invoke,/no_preview)
+### for *.pro files
+IDL (https://www.l3harrisgeospatial.com/Software-Technology/IDL) or 
+GDL (https://gnudatalanguage.github.io ,/no_preview should be invoked)
 
 ifort or gfortran
 
