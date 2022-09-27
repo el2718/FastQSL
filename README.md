@@ -1,8 +1,5 @@
 # FastQSL
 The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist after September 2022, those codes (and their updates) will be publish on this site from July 2022.
-
-Usage: please see the beginning of qfactor.pro
-
 -----------------------------
 ## Dependencies
 ### for *.pro files
@@ -14,6 +11,9 @@ GDL (https://gnudatalanguage.github.io); note: GDL has problem of write_png,/no_
 ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran) or 
 
 gfortran (https://gcc.gnu.org/wiki/GFortran)
+
+## Usage
+please see the beginning of qfactor.pro
 
 ## Cite as
 
