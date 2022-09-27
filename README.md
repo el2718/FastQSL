@@ -10,8 +10,7 @@ IDL (https://www.l3harrisgeospatial.com/Software-Technology/IDL) or
 GDL (https://gnudatalanguage.github.io ,/no_preview should be invoked)
 
 ### for *.f90 files
-ifort 
-https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran
+ifort (https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran)
 or gfortran
 
 ## Cite as
