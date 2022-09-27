@@ -4,6 +4,8 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 Usage: please see the beginning of qfactor.pro
 
 -----------------------------
+# Installation of ifort
+https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran
 
 ## Cite as
 
