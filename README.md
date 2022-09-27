@@ -16,6 +16,9 @@ The server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist af
 ## Usage
 Please see the beginning of qfactor.pro
 
+## Another branch with GPU
+https://github.com/peijin94/FastQSL
+
 ## Cite as
 
 * Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022. FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 937, 26
