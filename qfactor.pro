@@ -38,7 +38,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;                if invoked, the units of x{yz}reg, delta, length are same as x{yz}a, 
 ;                while the units of step and tol are the scale of a cell (a self-adaptive fashion that varying from cell to cell)
 ;
-;   xreg, yreg, zreg: coordinates of the field region, in arrays of two elements, default is to include all available pixels at the photosphere.
+;   xreg, yreg, zreg: coordinates of the output region, in arrays of two elements, default is to include all available pixels at the photosphere.
 ;                 If stretchFlag=0B, the unit of coordinates is pixel, and the origin of the 3D field is [0, 0, 0].
 ;                 --- If (xreg[0] ne xreg[1]) AND (yreg[0] ne yreg[1]) AND (zreg[0] ne zreg[1]) AND NOT csFlag
 ;                     calculate Q in a box volume
