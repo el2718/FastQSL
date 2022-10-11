@@ -26,7 +26,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
 ;
 ;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for Mac OS, then please substitutue -O3 for it;
-;  please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
+;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
 ; For Windows:
 ;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
