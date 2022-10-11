@@ -31,7 +31,6 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
 ;   and please replace qfactor.x by qfactor.exe for the path specifing
 ;
-;
 ; INPUTS
 ;   Bx, By, Bz: 3D magnetic field, will be forcibly converted the to float arrays while writing 'b3d.bin'
 ;   
