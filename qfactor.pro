@@ -19,12 +19,18 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   trace_bline.f90
 ;   trace_scott.f90
 ;
-; ------COMPILATION (either by ifort or gfortran): 
+; ------COMPILATION 
+;
+; For Linux and Mac OS (either by ifort or gfortran): 
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
 ;
 ;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for Mac OS, then please substitutue -O3 for it;
 ;  please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
+;
+; For Windows:
+;   ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
+;   and please replace qfactor.x by qfactor.exe for the path specifing
 ;
 ;
 ; INPUTS
@@ -242,8 +248,7 @@ if ~keyword_set(step)       then step=1.
 if ~keyword_set(maxsteps)   then maxsteps=long(4*(nx+ny+nz)/step)
 ;----------------------------------------------------------------------------------------------
 ; the directory for output
-spawn, 'pwd', /noshell, cdir
-cdir=cdir[0]
+cd, current = cdir
 IF STRMID(cdir, STRLEN(cdir)-1) NE '/' THEN cdir=cdir+'/'
 
 if  keyword_set(odir) then  begin 
@@ -253,18 +258,17 @@ endif else begin
 	preset_odir=0B
 	odir= cdir+'qfactor/'
 endelse
-spawn,'ls -d '+odir, out, error_out
-if (out[0] eq '') then spawn, 'mkdir '+odir
+if ~file_test(odir) then file_mkdir, odir
 ;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
-spawn,'ls -d '+tmp_dir, out, error_out
-if (out[0] eq '') then spawn, 'mkdir '+tmp_dir
-dummy=file_search(tmp_dir+'*.txt',count=nf)
-if nf ne 0 then spawn,'rm '+tmp_dir+'*.txt'
-dummy=file_search(tmp_dir+'*.bin',count=nf)
-if nf ne 0 then spawn,'rm '+tmp_dir+'*.bin'
+if ~file_test(tmp_dir) then file_mkdir, tmp_dir
+dummy=file_search(odir,'*.{txt,bin}',count=nf)
+if nf ne 0 then file_delete, dummy
 ;----------------------------------------------------------------------------------------------
+; load doppler_color table
+if (~no_preview) then doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
+
 ;  transmit data
 cd, tmp_dir
 get_lun,unit
@@ -409,12 +413,7 @@ if (~no_preview) then begin
 	
 	im=TVRD(0,0,nx_mag,ny_mag)
 	write_png, odir+fstr+'_bz.png', im
-
 	set_plot, cur_device
-	
-	; load doppler_color table
-	doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
-	
 
 	if (stretchFlag) then length_top=sqrt((xa(nx-1)-xa(0))^2.0+(ya(ny-1)-ya(0))^2.0+(za(nz-1)-za(0))^2.0) $
 		         else length_top=sqrt(nx^2.0+ny^2.0+nz^2.0)
@@ -645,15 +644,12 @@ IF vflag THEN BEGIN
 	endelse
 ENDIF 
 ;----------------------------------------------------------------------------------------------	
-print,"Results are saved in '"+file_sav+"'"
-
 ; hourse keeping
-spawn, 'rm -r '+tmp_dir
+file_delete, tmp_dir, /recursive
 cd, cdir
 free_lun, unit, /force
 if ~(preset_odir) then dummy=temporary(odir)
 if ~(preset_fstr) then dummy=temporary(fstr)
 
-print,'--------------------Done--------------------'
+print,"Results are saved in '"+file_sav+"'"
 END
-
