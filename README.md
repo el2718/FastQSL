@@ -13,6 +13,7 @@ A GPU version is also provided https://github.com/peijin94/FastQSL.
 
 ### For *.f90
 * ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran or
+  * note: For Windows, if Visual Studio is not integrated, please execute "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" in cmd or powershell first
 * gfortran https://gcc.gnu.org/wiki/GFortran
 
 ## Usage
