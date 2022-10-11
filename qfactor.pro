@@ -29,7 +29,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;  please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
 ; For Windows:
-;   ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
+;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
 ;   and please replace qfactor.x by qfactor.exe for the path specifing
 ;
 ;
