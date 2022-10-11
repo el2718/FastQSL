@@ -176,6 +176,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   May 10,2022 J. Chen, determine qx, qy, qz, z0flag, cflag, vflag in qfactor.x
 ;   May 19,2022 J. Chen, check the existence of nulls on grids; add a keyword of RAMtmp
 ;   Jun 10,2022 J. Chen, adapt to stretched grids
+;   Oct 11,2022 J. Chen, adapt to Windows
 ;
 ;
 ;   This software is provided without any warranty. Permission to use,
