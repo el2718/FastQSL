@@ -269,7 +269,7 @@ if nf ne 0 then file_delete, dummy
 ;----------------------------------------------------------------------------------------------
 ; load doppler_color table
 if (~no_preview) then doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
-
+;----------------------------------------------------------------------------------------------
 ;  transmit data
 cd, tmp_dir
 get_lun,unit
@@ -652,5 +652,5 @@ free_lun, unit, /force
 if ~(preset_odir) then dummy=temporary(odir)
 if ~(preset_fstr) then dummy=temporary(fstr)
 
-print,"Results are saved in '"+file_sav+"'"
+print, "Results are saved in '"+file_sav+"'"
 END
