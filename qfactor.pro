@@ -20,11 +20,11 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   trace_scott.f90
 ;
 ; ------COMPILATION 
-; For Linux and Mac OS (either by ifort or gfortran): 
+; For Linux and MacOS (either by ifort or gfortran): 
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
 ;
-;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for Mac OS, then please substitutue -O3 for it;
+;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for MacOS, then please substitutue -O3 for it;
 ;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
 ; For Windows:
