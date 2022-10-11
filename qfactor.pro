@@ -262,7 +262,7 @@ if ~file_test(odir) then file_mkdir, odir
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
 if ~file_test(tmp_dir) then file_mkdir, tmp_dir
-dummy=file_search(odir,'*.{txt,bin}',count=nf)
+dummy=file_search(tmp_dir,'*.{txt,bin}',count=nf)
 if nf ne 0 then file_delete, dummy
 ;----------------------------------------------------------------------------------------------
 ; load doppler_color table
