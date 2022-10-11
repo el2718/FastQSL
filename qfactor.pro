@@ -20,7 +20,6 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   trace_scott.f90
 ;
 ; ------COMPILATION 
-;
 ; For Linux and Mac OS (either by ifort or gfortran): 
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
