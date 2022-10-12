@@ -74,7 +74,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   scottFlag:  calculate Q and Q_perp by the method of Scott_2017_ApJ_848_117; default is 0B (method 3 of Pariat_2012_A&A_541_A78)
 ;
-;   maxsteps:   maxium steps for stracing a field line at one direction; default is 4*(nx+ny+nz)/step
+;   maxsteps:   maxium steps for stracing a field line at one direction; default is 4*(nx+ny+nz)/step; 
+;               if highly twisted field lines exist and traced by RK4, this value should be larger; suggested by Jiang, Chaowei
 ;
 ;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
 ;
