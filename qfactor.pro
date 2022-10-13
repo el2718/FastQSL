@@ -201,7 +201,7 @@ n_ss=n_elements(ss)
 if (n_ss gt 3) then message, string(n_ss)+" nulls (B=0) on grids! Too many!"
 
 ; check the existence of infinite or NaN values on grids, to avoid "segmentation fault occurred"
-ss=where(~finite(bx) or ~finite(by) and ~finite(bz))
+ss=where(~finite(bx) or ~finite(by) or ~finite(bz))
 if (ss[0] ne -1) then message, "there are some infinite or NaN vaules on grids"
 
 
