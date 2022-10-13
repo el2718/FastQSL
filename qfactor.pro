@@ -176,6 +176,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   May 19,2022 J. Chen, check the existence of nulls on grids; add a keyword of RAMtmp
 ;   Jun 10,2022 J. Chen, adapt to stretched grids
 ;   Oct 11,2022 J. Chen, adapt to Windows
+;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids;
 ;
 ;
 ;   This software is provided without any warranty. Permission to use,
@@ -198,6 +199,10 @@ nx=sbz[1] & ny=sbz[2] & nz=sbz[3]
 ss=where((bx eq 0.0) and (by eq 0.0) and (bz eq 0.0))
 n_ss=n_elements(ss)
 if (n_ss gt 3) then message, string(n_ss)+" nulls (B=0) on grids! Too many!"
+
+; check the existence of infinite or NaN values on grids, to avoid "segmentation fault occurred"
+ss=where(~finite(bx) or ~finite(by) and ~finite(bz))
+if (ss[0] ne -1) then message, "there are some infinite or NaN vaules on grids"
 
 
 stretchFlag=keyword_set(xa) and keyword_set(ya) and keyword_set(za)
@@ -421,7 +426,7 @@ endif
 
 ; Q at the photosphere ----------------------------------------------------------------------------------------------
 IF z0Flag THEN BEGIN
-  ; get data From Fortran
+; read the output of qfactor.x
 	q=fltarr(q1,q2)
 	slogq=fltarr(q1,q2)
   	length=fltarr(q1,q2)
@@ -441,17 +446,17 @@ IF z0Flag THEN BEGIN
 	slogq_orig=slogq
 	if(ss_rb[0] ne -1) then slogq_orig[ss_rb]=0.0
 
-  ; preview images
+; preview images
   	if (~no_preview) then begin  		
 		slogq_tmp=slogq_orig
 		ss=WHERE(FINITE(slogq_tmp, /NAN))
-		if(ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
+		if (ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
 		im=bytscl(slogq_tmp,min=-5,max=5,/nan)
 		write_png, odir+fstr+'_slogq_orig.png', im, r_doppler, g_doppler, b_doppler
 		
 		slogq_tmp=slogq
 		ss=WHERE(FINITE(slogq_tmp, /NAN))
-		if(ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
+		if (ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
 		im=bytscl(slogq_tmp, min=-5,max=5,/nan)
 		write_png, odir+fstr+'_slogq.png', im, r_doppler, g_doppler, b_doppler	
 			
@@ -460,12 +465,12 @@ IF z0Flag THEN BEGIN
 		
 		ss=where(Bnr eq 0.0)
 		Bnr_tmp=Bnr
-		if(ss[0] ne -1) then Bnr_tmp[ss]=1.   ; to avoid "Program caused arithmetic error: Floating divide by 0"
+		if (ss[0] ne -1) then Bnr_tmp[ss]=1.   ; to avoid "Program caused arithmetic error: Floating divide by 0"
 		im=bytscl(alog10(Bnr_tmp),min=-2,max=2,/nan) 
 		write_png, odir+fstr+'_lg(Bnr).png', im, r_doppler, g_doppler, b_doppler
 	endif
 		
-  ; q_perp map
+; q_perp map
 	if scottFlag then begin
 		q_perp=fltarr(q1,q2)
 		slogq_perp=fltarr(q1,q2)
@@ -478,7 +483,7 @@ IF z0Flag THEN BEGIN
 		close, unit
 		
 		slogq_perp_orig=slogq_perp
-		if(ss_rb[0] ne -1) then slogq_perp_orig[ss_rb]=0.0
+		if (ss_rb[0] ne -1) then slogq_perp_orig[ss_rb]=0.0
 		
 		if (~no_preview) then begin
 			slogq_tmp=slogq_perp_orig
@@ -495,7 +500,7 @@ IF z0Flag THEN BEGIN
 		endif
 	endif  
   
-  ; twist map
+; twist map
 	if twistFlag then begin
 		twist=fltarr(q1,q2)
 		openr, unit, tmp_dir+'twist.bin'
@@ -507,7 +512,7 @@ IF z0Flag THEN BEGIN
 		endif
 	endif
 
-  ; save results 
+; save results 
 	if scottFlag then begin
 	 	if twistFlag then save, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, $
 	 	                  rF, q_perp, slogq_perp, slogq_perp_orig, twist $ 
@@ -521,7 +526,7 @@ ENDIF
 
 ; Q at the cross section ----------------------------------------------------------------------------------------------
 IF cFlag THEN BEGIN
-
+; read the output of qfactor.x
 	qcs=fltarr(q1,q2)
 	length=fltarr(q1,q2)
 	rsF=fltarr(3,q1,q2)
@@ -536,8 +541,8 @@ IF cFlag THEN BEGIN
 	qcs_orig=qcs
 	ss1=where(rsboundary ne 1)
 	ss2=where(reboundary ne 1)
-	if(ss1[0] ne -1) then qcs_orig[ss1]=!values.F_NAN
-	if(ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
+	if (ss1[0] ne -1) then qcs_orig[ss1]=!values.F_NAN
+	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
 
 	
 	if (~no_preview) then begin
@@ -557,8 +562,8 @@ IF cFlag THEN BEGIN
 		close, unit
 		
 		q_perp_orig=q_perp
-		if(ss1[0] ne -1) then q_perp_orig[ss1]=!values.F_NAN
-		if(ss2[0] ne -1) then q_perp_orig[ss2]=!values.F_NAN
+		if (ss1[0] ne -1) then q_perp_orig[ss1]=!values.F_NAN
+		if (ss2[0] ne -1) then q_perp_orig[ss2]=!values.F_NAN
 		logq_perp_orig=alog10(q_perp_orig>1)
 		logq_perp=alog10(q_perp>1.)		
 		
@@ -581,7 +586,7 @@ IF cFlag THEN BEGIN
 		endif
 	endif	   
 
-  ; save results 
+; save results 
 	if scottFlag then begin
 		if twistFlag then save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig, twist $
 		             else save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig	
@@ -594,7 +599,7 @@ ENDIF
 
 ; Q in the 3D box volume ----------------------------------------------------------------------------------------------
 IF vflag THEN BEGIN
-  ;get data From Fortran
+; read the output of qfactor.x
 	q3d=fltarr(qx,qy,qz)
 	openr, unit, 'q3d.bin'
 	readu, unit, q3d
@@ -604,8 +609,8 @@ IF vflag THEN BEGIN
 	openr, unit, 'rboundary3d.bin'
 	readu, unit, rboundary3d
 	close, unit	
-  ;     rboundary3d=rsboundary3d+8*reboundary3d  (It has been calculated in Fortran),
-  ;     so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere
+;     rboundary3d=rsboundary3d+8*reboundary3d  (It has been calculated in Fortran),
+;     so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere
 
 	if scottFlag then begin
 		q_perp3d=fltarr(qx,qy,qz)
@@ -634,7 +639,7 @@ IF vflag THEN BEGIN
 		write_png, odir+fstr+'_z0_slogq.png', im, r_doppler, g_doppler, b_doppler
 	endif 
 		
-  ; save results 
+; save results 
 	if scottFlag then begin
 		if twistFlag then save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d, twist3d $
 		             else save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d
