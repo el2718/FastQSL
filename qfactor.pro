@@ -27,9 +27,9 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for MacOS, then please substitutue -O3 for it;
 ;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
-;   For Windows:
+;   For Windows: (executing "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" in cmd first would be necessary)
 ;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
-;   and please replace qfactor.x by qfactor.exe for the path specifing
+;   please replace qfactor.x by qfactor.exe for the path specifing
 ;
 ; INPUTS
 ;   Bx, By, Bz: 3D magnetic field, will be forcibly converted the to float arrays while writing 'b3d.bin'
@@ -118,12 +118,13 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;                5 - end at xmin
 ;                6 - end at xmax
 ;                7 - others
-;   rboundary3d=rsboundary3d+8*reboundary3d; For saving storage
+;   rboundary3d=rsboundary3d+8*reboundary3d, so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere; For saving storage
 ;
 ;   rF/rsF/reF: coordinates of mapping points (F:foot)
 ; 
 ;   length: length of field lines
-; 
+;
+;   Bnr: abs(Bn_local/Bn_target) at the photosphere
 ;
 ; MODIFICATION HISTORY:
 ;   Developed by R. Liu, J. Chen and Peijing, Zhang @ USTC
@@ -141,10 +142,9 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		(1) fuse qcs and qfactor in qfactor.f90;  
 ;		(2) the cross section can be paralleled to the photosphere;
 ;		(3) set tmp_dir;	  
-;   Nov 4, 2015 J. Chen, introduce rboundary3d=byte(rsboundary3d+8*reboundary3d),
-;		so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere;		
+;   Nov 4, 2015 J. Chen, introduce rboundary3d				
 ;   Jun 22,2016 J. Chen, add the map of field line length
-;   Oct 30,2017 J. Chen, add the map of Bnr=abs(Bn_local/Bn_target) at the photosphere
+;   Oct 30,2017 J. Chen, add the map of Bnr
 ;   Aug 28,2018 J. Chen, supplement Q at maginal points
 ;   May  1,2021 Peijing Zhang and J. Chen, trace field line with RKF45; RK4 is remainded, modify classic RK4 to the 3/8-rule RK4
 ;   May  1,2021 J. Chen, adapted to gfortran compiler
@@ -270,9 +270,6 @@ if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
 if ~file_test(tmp_dir) then file_mkdir, tmp_dir
 dummy=file_search(tmp_dir,'*.{txt,bin}',count=nf)
 if nf ne 0 then file_delete, dummy
-;----------------------------------------------------------------------------------------------
-; load doppler_color table
-if (~no_preview) then doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
 ;----------------------------------------------------------------------------------------------
 ;  transmit data
 get_lun,unit
@@ -409,11 +406,11 @@ if (~no_preview) then begin
 		
 	if (stretchFlag) then begin
 		if csflag then plots, (xreg-xa(0))/delta_mag, (yreg-ya(0))/delta_mag, /dev $
-			  else plots, ([xreg[0],xreg[1],xreg[1],xreg[0],xreg[0]]-xa(0))/delta_mag, $
+		          else plots, ([xreg[0],xreg[1],xreg[1],xreg[0],xreg[0]]-xa(0))/delta_mag, $
 			              ([yreg[0],yreg[0],yreg[1],yreg[1],yreg[0]]-ya(0))/delta_mag, /dev
 	endif else begin
 		if csflag then plots, xreg, yreg, /dev $
-			  else plots, [xreg[0],xreg[1],xreg[1],xreg[0],xreg[0]], [yreg[0],yreg[0],yreg[1],yreg[1],yreg[0]], /dev
+		          else plots, [xreg[0],xreg[1],xreg[1],xreg[0],xreg[0]], [yreg[0],yreg[0],yreg[1],yreg[1],yreg[0]], /dev
 	endelse
 	
 	im=TVRD(0,0,nx_mag,ny_mag)
@@ -421,7 +418,10 @@ if (~no_preview) then begin
 	set_plot, cur_device
 
 	if (stretchFlag) then length_top=sqrt((xa(nx-1)-xa(0))^2.0+(ya(ny-1)-ya(0))^2.0+(za(nz-1)-za(0))^2.0) $
-		         else length_top=sqrt(nx^2.0+ny^2.0+nz^2.0)
+	                 else length_top=sqrt(nx^2.0+ny^2.0+nz^2.0)
+		         
+; load doppler_color table
+	doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
 endif
 
 ; Q at the photosphere ----------------------------------------------------------------------------------------------
@@ -608,10 +608,8 @@ IF vflag THEN BEGIN
 	rboundary3d=bytarr(qx,qy,qz)	
 	openr, unit, tmp_dir+'rboundary3d.bin'
 	readu, unit, rboundary3d
-	close, unit	
-;     rboundary3d=rsboundary3d+8*reboundary3d  (It has been calculated in Fortran),
-;     so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere
-
+	close, unit
+	
 	if scottFlag then begin
 		q_perp3d=fltarr(qx,qy,qz)
 		openr, unit, tmp_dir+'q_perp3d.bin'
