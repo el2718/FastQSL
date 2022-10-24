@@ -275,16 +275,15 @@ if nf ne 0 then file_delete, dummy
 if (~no_preview) then doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
 ;----------------------------------------------------------------------------------------------
 ;  transmit data
-cd, tmp_dir
 get_lun,unit
 
-openw,  unit, 'head.txt'
+openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
 printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
 printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag)
 close,  unit
 
-openw,  unit, 'b3d.bin'
+openw,  unit, tmp_dir+'b3d.bin'
 if keyword_set(tmpB) then $
      writeu, unit, float(temporary(Bx)), float(temporary(By)), float(temporary(Bz)) $
 else writeu, unit, float(Bx), float(By), float(Bz)
@@ -292,24 +291,25 @@ close,  unit
 
 if (stretchFlag) then begin
 ;txt file could introduce errors to values while binary file doesn't
-	openw,  unit, 'xa.bin'
+	openw,  unit, tmp_dir+'xa.bin'
 	writeu, unit, float(xa)
 	close,  unit
 
-	openw,  unit, 'ya.bin'
+	openw,  unit, tmp_dir+'ya.bin'
 	writeu, unit, float(ya)
 	close,  unit
 
-	openw,  unit, 'za.bin'
+	openw,  unit, tmp_dir+'za.bin'
 	writeu, unit, float(za)
 	close,  unit
 endif
 ;----------------------------------------------------------------------------------------------
 ; calculate in Fortran
+cd, tmp_dir
 tnow=systime(1)
 spawn, 'qfactor.x' ; if not known by the system, specify the path
 tend=systime(1)
-
+cd, cdir
 tcalc=tend-tnow
 
 if (tcalc ge 3600.0) then begin
@@ -323,7 +323,7 @@ print, time_elapsed+' elapsed for calculating qfactor'
 ; ################################### retrieving results ###################################################### 
 qx=0L & qy=0L & qz=0L & q1=0L & q2=0L
 z0Flag=0 & vFlag=0 & cFlag=0
-openr,  unit, 'tail.txt'
+openr,  unit, tmp_dir+'tail.txt'
 readf,  unit, qx, qy, qz, q1, q2
 readf,  unit, z0Flag, cFlag, vFlag
 close,  unit
@@ -389,12 +389,12 @@ if (~no_preview) then begin
 	
 	if (stretchFlag) then begin
 		nx_mag=0L & ny_mag=0L & delta_mag=0.0
-		openr, unit,'mag_info.txt'
+		openr, unit, tmp_dir+'mag_info.txt'
 		readf, unit, nx_mag, ny_mag, delta_mag
 		close, unit
 		
 		magnetogram=fltarr(nx_mag, ny_mag)
-		openr, unit,'magnetogram.bin'
+		openr, unit, tmp_dir+'magnetogram.bin'
 		readu, unit, magnetogram
 		close, unit
 	endif else begin
@@ -601,12 +601,12 @@ ENDIF
 IF vflag THEN BEGIN
 ; read the output of qfactor.x
 	q3d=fltarr(qx,qy,qz)
-	openr, unit, 'q3d.bin'
+	openr, unit, tmp_dir+'q3d.bin'
 	readu, unit, q3d
 	close, unit
 	
 	rboundary3d=bytarr(qx,qy,qz)	
-	openr, unit, 'rboundary3d.bin'
+	openr, unit, tmp_dir+'rboundary3d.bin'
 	readu, unit, rboundary3d
 	close, unit	
 ;     rboundary3d=rsboundary3d+8*reboundary3d  (It has been calculated in Fortran),
@@ -614,21 +614,21 @@ IF vflag THEN BEGIN
 
 	if scottFlag then begin
 		q_perp3d=fltarr(qx,qy,qz)
-		openr, unit, 'q_perp3d.bin'
+		openr, unit, tmp_dir+'q_perp3d.bin'
 		readu, unit, q_perp3d
 		close, unit
 	endif  
 
 	if twistFlag then begin
 		twist3d=fltarr(qx,qy,qz)
-		openr, unit, 'twist3d.bin'
+		openr, unit, tmp_dir+'twist3d.bin'
 		readu, unit, twist3d
 		close, unit
 	endif
 	
 	if (zreg[0] eq 0.0) and (~no_preview) then begin
 		slogq=fltarr(q1,q2)	
-		openr, unit, 'slogq.bin'
+		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
 		close, unit
 		
@@ -651,7 +651,6 @@ ENDIF
 ;----------------------------------------------------------------------------------------------	
 ; hourse keeping
 file_delete, tmp_dir, /recursive
-cd, cdir
 free_lun, unit, /force
 if ~(preset_odir) then dummy=temporary(odir)
 if ~(preset_fstr) then dummy=temporary(fstr)
