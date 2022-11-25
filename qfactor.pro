@@ -1,6 +1,6 @@
 PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag, $
              factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, scottFlag=scottFlag, $
-             maxsteps=maxsteps, twistFlag=twistFlag, nbridges=nbridges, odir=odir, fstr=fstr, $
+             maxsteps=maxsteps, twistFlag=twistFlag, curlB_out=curlB_out, nbridges=nbridges, odir=odir, fstr=fstr, $
              no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
 ;+
 ; PURPOSE:
@@ -76,14 +76,16 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   maxsteps:   maxium steps for stracing a field line at one direction; default is 4*(nx+ny+nz)/step; 
 ;               if highly twisted field lines exist and traced by RK4, this value should be larger; suggested by Jiang, Chaowei
-;
-;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
-;
-;   nbridges:   number of processors to engage; default is 8
 ;		
 ;   odir:       directory to save the results
 ;		
-;   fstr:       filename of the results; file_sav=odir+fstr+'.sav'
+;   fstr:       filename of the results; file_sav=odir+fstr+'.sav';
+;
+;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
+;
+;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; only calculate curlB then return
+;
+;   nbridges:   number of processors to engage; default is 8
 ; 
 ;   no_preview: don't produce PNG images for preview; default is 0B; 
 ;               If invoked, then this program can run with GDL (https://github.com/gnudatalanguage/gdl) because write_png is skipped.
@@ -94,7 +96,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		if invoked, please run only one task of qfactor.pro simultaneously on one machine
 ;
 ;  memory occupation in qfactor.x: 
-;       3D magnetic field + some 2D arrays + 3D CurlB field (same as the occupation of the 3D magnetic field, when twistFlag=1B) +
+;       3D magnetic field + some 2D arrays + 3D curlB field (same as the occupation of the 3D magnetic field, when twistFlag=1B) +
 ;       grad_unit_vec_Bfield (3 times as the occupation of the 3D magnetic field)
 ;
 ;
@@ -176,7 +178,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   May 19,2022 J. Chen, check the existence of nulls on grids; add a keyword of RAMtmp
 ;   Jun 10,2022 J. Chen, adapt to stretched grids
 ;   Oct 11,2022 J. Chen, adapt to Windows
-;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids;
+;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids
+;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;
 ;
 ;   This software is provided without any warranty. Permission to use,
@@ -243,9 +246,12 @@ if ~keyword_set(delta) then begin
 endif
 
 if  keyword_set(twistFlag)  then twistFlag =1B else twistFlag =0B
+
 if  keyword_set(RK4Flag)    then RK4Flag   =1B else RK4Flag   =0B
 if  keyword_set(scottFlag)  then scottFlag =1B else scottFlag =0B
+if  keyword_set(curlB_out)  then curlB_out =1B else curlB_out =0B
 if  keyword_set(no_preview) then no_preview=1B else no_preview=0B
+no_preview=no_preview and (not curlB_out)
 if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
 if ~keyword_set(tol)        then tol=10.0^(-4.)
@@ -265,6 +271,15 @@ endif else begin
 endelse
 if ~file_test(odir) then file_mkdir, odir
 ;----------------------------------------------------------------------------------------------
+if curlB_out then begin
+	file_sav=odir+'curlB.sav'
+	if file_test(file_sav) then begin 
+		print, file_sav+' exist'
+		if ~preset_odir then dummy=temporary(odir)
+		return
+	endif
+endif
+;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
 if ~file_test(tmp_dir) then file_mkdir, tmp_dir
@@ -277,7 +292,7 @@ get_lun,unit
 openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
 printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
-printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag)
+printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), long(curlB_out)
 close,  unit
 
 openw,  unit, tmp_dir+'b3d.bin'
@@ -315,7 +330,7 @@ endif else begin
 	if (tcalc ge 60.0) then time_elapsed=string(tcalc/60.0,format='(f0.2)')+' minutes' $
 	                   else time_elapsed=string(tcalc,     format='(f0.2)')+' seconds'
 endelse
-print, time_elapsed+' elapsed for calculating qfactor' 
+print, time_elapsed+' elapsed for calculation' 
 
 ; ################################### retrieving results ###################################################### 
 qx=0L & qy=0L & qz=0L & q1=0L & q2=0L
@@ -376,13 +391,27 @@ endif else begin
 	
 	fstr = head_str + delta_str + cut_str
 endelse
-
-file_sav=odir+fstr+'.sav'
+;----------------------------------------------------------------------------------------------
+; save curlB
+if curlB_out then begin
+	curlB=fltarr(3, nx, ny, nz)
+	openr, unit, tmp_dir+'curlB.bin'
+	readu, unit, curlB
+	close, unit
+		
+	curlBx=reform(curlB[0,*,*,*])
+	curlBy=reform(curlB[1,*,*,*])
+	curlBz=reform(curlB[2,*,*,*])
+	
+	save, filename=file_sav, curlBx, curlBy, curlBz	
+	; release the memory of curlB	
+	dummy=(temporary(curlB))[0]+(temporary(curlBx))[0]+(temporary(curlBy))[0]+(temporary(curlBz))[0]
+endif else begin
+	file_sav=odir+fstr+'.sav'
+endelse
 ;----------------------------------------------------------------------------------------------
 ; mark the area for calculation on the magnetogram
 if (~no_preview) then begin
-	cur_device=!D.name
-	SET_PLOT, 'Z' 
 	
 	if (stretchFlag) then begin
 		nx_mag=0L & ny_mag=0L & delta_mag=0.0
@@ -398,7 +427,9 @@ if (~no_preview) then begin
 		nx_mag=nx
 		ny_mag=ny
 	endelse
-	
+
+	cur_device=!D.name
+	SET_PLOT, 'Z' 	
 	DEVICE, SET_RESOLUTION=[nx_mag, ny_mag]
 
 	scale_top= max(abs(magnetogram))/2.0 < 1000.0
@@ -646,12 +677,13 @@ IF vflag THEN BEGIN
 		             else save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta	
 	endelse
 ENDIF 
+
 ;----------------------------------------------------------------------------------------------	
 ; hourse keeping
 file_delete, tmp_dir, /recursive
 free_lun, unit, /force
-if ~(preset_odir) then dummy=temporary(odir)
-if ~(preset_fstr) then dummy=temporary(fstr)
+if ~preset_odir then dummy=temporary(odir)
+if ~preset_fstr then dummy=temporary(fstr)
 
 print, "Results are saved in '"+file_sav+"'"
 END
