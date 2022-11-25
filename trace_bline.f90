@@ -13,7 +13,7 @@ end module qfactor_common
 
 module trace_common
 implicit none
-	integer:: nx, ny, nz, nxm1, nym1, nzm1, nxm2, nym2, nzm2, mmaxsteps, maxsteps, maxsteps_foot, &
+	integer:: nx, ny, nz, nxm1, nym1, nzm1, nxm2, nym2, nzm2, maxsteps, maxsteps_foot, &
 	binary_index_xs, binary_index_ys, binary_index_zs, index_try_xs, index_try_ys, index_try_zs
 	integer(2), allocatable:: binary_values(:)
 	real:: xmax, ymax, zmax, xmin, ymin, zmin, pmin(0:2), pmax(0:2), r0max(0:2), &
@@ -924,22 +924,25 @@ implicit none
 external vp_index0, vp_index_uni_stretch, round_weight0, round_weight_stretch, &
 grad_unit_vec_B_grid0, grad_unit_vec_B_grid_stretch, curlB_grid0, curlB_grid_stretch
 !----------------------------------------------------------------------------
-integer:: i, j, k, s, twistFlag_int, csFlag_int, RK4flag_int, scottFlag_int, &
+integer:: i, j, k, s, &
+twistFlag_int, RK4flag_int, scottFlag_int, csFlag_int, curlB_out_int, &
 q0flag_int, vflag_int, cflag_int, reclen, nbridges, nx_mag, ny_mag
 real, allocatable:: Bfield_tmp(:, :, :, :), magnetogram(:, :)
 real:: point1(0:2), point2(0:2), vp(0:2), bp(0:2), delta_mag
-logical:: xa_exist, ya_exist, za_exist, ifort_flag
+logical:: xa_exist, ya_exist, za_exist, ifort_flag, curlB_out
+real:: t1, t2
 !----------------------------------------------------------------------------
 open(unit=8, file='head.txt', status='old')
 read(8, *) nx, ny, nz, nbridges, delta, maxsteps, &
            xreg, yreg, zreg, step, tol, &
-           twistFlag_int, RK4flag_int, scottFlag_int, csFlag_int
+           twistFlag_int, RK4flag_int, scottFlag_int, csFlag_int, curlB_out_int
  close(8)
  
-twistFlag=twistFlag_int .eq. 1
-  RK4Flag=  RK4flag_int .eq. 1
-scottFlag=scottFlag_int .eq. 1
-   csFlag=   csFlag_int .eq. 1
+ twistFlag=twistFlag_int .eq. 1
+   RK4Flag=  RK4flag_int .eq. 1
+ scottFlag=scottFlag_int .eq. 1
+    csFlag=   csFlag_int .eq. 1
+ curlB_out=curlB_out_int .eq. 1
 !----------------------------------------------------------------------------
 ! for RKF45
 if (.not. RK4flag) then
@@ -957,10 +960,9 @@ nxm2=nx-2; nym2=ny-2; nzm2=nz-2
 NaN =transfer(2143289344, 1.0)
 
 !maxsteps    =nint(4*(nx+ny+nz)/step)*10
-mmaxsteps    =-maxsteps
 min_incline  =0.05
-min_step     =1.0/4.0
-min_step_foot=1.0/8.0
+min_step     =minval([step, delta])
+min_step_foot=min_step/2.0
 delta1	     =delta/2.0
 if  (RK4flag) then
 	maxsteps_foot=    step/min_step_foot*4
@@ -971,10 +973,14 @@ endif
 ! read Bx, By, Bz
 allocate(Bfield(0:2, 0:nxm1, 0:nym1, 0:nzm1))
 allocate(Bfield_tmp( 0:nxm1, 0:nym1, 0:nzm1, 0:2))
+t1 = SECNDS(0.0)
 open(unit=8, file='b3d.bin', access='stream', status='old')
 read(8) Bfield_tmp
  close(8)
+ t2 = SECNDS(t1)
+print*, t2, 'B read' 
  
+t1 = SECNDS(0.0) 
 inquire(iolength=reclen) 1.0 ! if reclen .eq. 4, compiled by gfortran; if reclen .eq. 1, compiled by ifort;
 ifort_flag=(reclen .eq. 1)
 
@@ -990,6 +996,8 @@ do k=0, nzm1
 	forall(s=0:2) Bfield(s,:,:,k)=Bfield_tmp(:,:,k,s)
 enddo
 !$OMP END PARALLEL DO
+t2 = SECNDS(t1)
+print*, t2, 'B transfer'
 
 deallocate(Bfield_tmp)
 
@@ -1051,9 +1059,9 @@ if (stretchFlag) then
 	close(8)
 endif
 !----------------------------------------------------------------------------
-q0Flag=(zreg(0) .eq. zmin) .and. (zreg(1) .eq. zmin) .and. (.not. csflag)    
- vFlag=(xreg(1) .ne. xreg(0)) .and. (yreg(1) .ne. yreg(0)) .and. (zreg(1) .ne. zreg(0)) .and. (.not. csflag)
- cFlag=(.not. vflag) .and. (.not. q0flag)
+q0Flag=(zreg(0) .eq. zmin) .and. (zreg(1) .eq. zmin) .and. (.not. csflag) .and. (.not. curlB_out)
+ vFlag=(xreg(1) .ne. xreg(0)) .and. (yreg(1) .ne. yreg(0)) .and. (zreg(1) .ne. zreg(0)) .and. (.not. csflag) .and. (.not. curlB_out)
+ cFlag=(.not. vflag) .and. (.not. q0flag) .and. (.not. curlB_out)
 
 if (csflag) then
 	Normal_index =-1
@@ -1102,23 +1110,9 @@ write(8, *) qx, qy, qz, q1, q2
 write(8, *) q0flag_int, cflag_int, vflag_int
  close(8)
 !----------------------------------------------------------------------------
-grad3DFlag= .not. ( q0flag .and. (.not. scottFlag))
-
-if (grad3DFlag) then
-	allocate(grad_unit_vec_Bfield(0:2,0:2, 0:nxm1, 0:nym1, 0:nzm1))
-	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
-	do k=0, nzm1
-	do j=0, nym1
-	do i=0, nxm1
-		call grad_unit_vec_B_grid(i, j, k, grad_unit_vec_Bfield(:,:,i,j,k))
-	enddo
-	enddo
-	enddo
-	!$OMP END PARALLEL DO
-endif
-!---------------------------------------------------------------------------- 
-if (twistFlag) then
+if (twistFlag .or. curlB_out) then
 	allocate(curlB(0:2, 0:nxm1, 0:nym1, 0:nzm1))
+	t1 = SECNDS(0.0)
 
 	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
 	do k=0, nzm1
@@ -1128,9 +1122,37 @@ if (twistFlag) then
 	enddo
 	enddo
 	enddo
-	!$OMP END PARALLEL DO	
+	!$OMP END PARALLEL DO
+	
+	if (curlB_out) then
+		open(unit=8, file='curlB.bin', access='stream', status='replace')
+		write(8) curlB
+		close(8)
+		stop
+	endif
+	t2 = SECNDS(t1)	
+	print*, t2, 'curlB'
 endif
 !----------------------------------------------------------------------------
+grad3DFlag= .not. ( q0flag .and. (.not. scottFlag))
+
+if (grad3DFlag) then
+	allocate(grad_unit_vec_Bfield(0:2,0:2, 0:nxm1, 0:nym1, 0:nzm1))
+	t1 = SECNDS(0.0)
+	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
+	do k=0, nzm1
+	do j=0, nym1
+	do i=0, nxm1
+		call grad_unit_vec_B_grid(i, j, k, grad_unit_vec_Bfield(:,:,i,j,k))
+	enddo
+	enddo
+	enddo
+	!$OMP END PARALLEL DO
+	t2 = SECNDS(t1)
+	print*, t2, 'gradUVB'
+endif
+!----------------------------------------------------------------------------
+
 allocate(     q(0:q1m1, 0:q2m1))
 allocate(   bnr(0:q1m1, 0:q2m1))
 allocate(length(0:q1m1, 0:q2m1))
