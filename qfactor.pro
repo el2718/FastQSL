@@ -1,7 +1,7 @@
 PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag, $
-             factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, scottFlag=scottFlag, $
-             maxsteps=maxsteps, twistFlag=twistFlag, curlB_out=curlB_out, nbridges=nbridges, odir=odir, fstr=fstr, $
-             no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
+             factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, maxsteps=maxsteps, $
+             scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out, odir=odir, fstr=fstr, $
+             nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
 ;+
 ; PURPOSE:
 ;   Calculate the squashing factor Q at the photosphere or a cross section
@@ -72,18 +72,18 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   tol:        tolerance of a step in RKF45; default is 10.^(-4)
 ;
-;   scottFlag:  calculate Q and Q_perp by the method of Scott_2017_ApJ_848_117; default is 0B (method 3 of Pariat_2012_A&A_541_A78)
-;
 ;   maxsteps:   maxium steps for stracing a field line at one direction; default is 4*(nx+ny+nz)/step; 
 ;               if highly twisted field lines exist and traced by RK4, this value should be larger; suggested by Jiang, Chaowei
+;
+;   scottFlag:  calculate Q and Q_perp by the method of Scott_2017_ApJ_848_117; default is 0B (method 3 of Pariat_2012_A&A_541_A78)
 ;		
+;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
+;
+;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; will only calculate curlB, then return
+;
 ;   odir:       directory to save the results
 ;		
 ;   fstr:       filename of the results; file_sav=odir+fstr+'.sav';
-;
-;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
-;
-;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; will only calculate curlB
 ;
 ;   nbridges:   number of processors to engage; default is 8
 ; 
@@ -236,8 +236,8 @@ if keyword_set(csFlag) then csFlag=1B else csFlag=0B
 
 if csFlag and (zreg[0] eq zreg[1]) then message, 'Something is wrong with the cross section .......'
 ;----------------------------------------------------------------------------------------------
-if ~keyword_set(nbridges)   then nbridges=8
 max_threads=!CPU.HW_NCPU
+if ~keyword_set(nbridges)   then nbridges=max_threads-2
 nbridges=nbridges < max_threads
 
 if ~keyword_set(delta) then begin
@@ -246,12 +246,11 @@ if ~keyword_set(delta) then begin
 endif
 
 if  keyword_set(twistFlag)  then twistFlag =1B else twistFlag =0B
-
 if  keyword_set(RK4Flag)    then RK4Flag   =1B else RK4Flag   =0B
 if  keyword_set(scottFlag)  then scottFlag =1B else scottFlag =0B
 if  keyword_set(curlB_out)  then curlB_out =1B else curlB_out =0B
 if  keyword_set(no_preview) then no_preview=1B else no_preview=0B
-no_preview=no_preview and (not curlB_out)
+preview=(not no_preview) and (not curlB_out)
 if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
 if ~keyword_set(tol)        then tol=10.0^(-4.)
@@ -411,7 +410,7 @@ endif else begin
 endelse
 ;----------------------------------------------------------------------------------------------
 ; mark the area for calculation on the magnetogram
-if (~no_preview) then begin
+if preview then begin
 	
 	if (stretchFlag) then begin
 		nx_mag=0L & ny_mag=0L & delta_mag=0.0
@@ -478,7 +477,7 @@ IF z0Flag THEN BEGIN
 	if(ss_rb[0] ne -1) then slogq_orig[ss_rb]=0.0
 
 ; preview images
-  	if (~no_preview) then begin  		
+  	if preview then begin  		
 		slogq_tmp=slogq_orig
 		ss=WHERE(FINITE(slogq_tmp, /NAN))
 		if (ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
@@ -516,7 +515,7 @@ IF z0Flag THEN BEGIN
 		slogq_perp_orig=slogq_perp
 		if (ss_rb[0] ne -1) then slogq_perp_orig[ss_rb]=0.0
 		
-		if (~no_preview) then begin
+		if preview then begin
 			slogq_tmp=slogq_perp_orig
 			ss=WHERE(FINITE(slogq_tmp, /NAN))
 			if(ss[0] ne -1) then slogq_tmp[ss]=0.0  ; value of NaN should be colored with white here
@@ -537,7 +536,7 @@ IF z0Flag THEN BEGIN
 		openr, unit, tmp_dir+'twist.bin'
 		readu, unit, twist
 		close, unit
-		if (~no_preview) then begin
+		if preview then begin
 			im=bytscl(twist,min=-2,max=2,/nan)
 			write_png, odir+fstr+'_twist.png', im, r_doppler, g_doppler, b_doppler
 		endif
@@ -576,7 +575,7 @@ IF cFlag THEN BEGIN
 	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
 
 	
-	if (~no_preview) then begin
+	if preview then begin
 		im=bytscl(alog10(qcs_orig>1.),min=0,max=5,/nan)
 		write_png, odir+fstr+'_logq_orig.png', im
 		
@@ -598,7 +597,7 @@ IF cFlag THEN BEGIN
 		logq_perp_orig=alog10(q_perp_orig>1)
 		logq_perp=alog10(q_perp>1.)		
 		
-		if (~no_preview) then begin
+		if preview then begin
 			im=bytscl(logq_perp_orig,min=0,max=5,/nan)
 			write_png, odir+fstr+'_logq_perp_orig.png', im
 			im=bytscl(logq_perp,min=0,max=5,/nan)
@@ -611,7 +610,7 @@ IF cFlag THEN BEGIN
 		openr, unit, tmp_dir+'twist.bin'
 		readu, unit, twist
 		close, unit
-		if (~no_preview) then begin
+		if preview then begin
 			im=bytscl(twist,min=-2,max=2,/nan)
 			write_png, odir+fstr+'_twist.png', im, r_doppler, g_doppler, b_doppler
 		endif
@@ -655,7 +654,7 @@ IF vflag THEN BEGIN
 		close, unit
 	endif
 	
-	if (zreg[0] eq 0.0) and (~no_preview) then begin
+	if (zreg[0] eq 0.0) and preview then begin
 		slogq=fltarr(q1,q2)	
 		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
