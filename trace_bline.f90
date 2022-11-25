@@ -930,7 +930,6 @@ q0flag_int, vflag_int, cflag_int, reclen, nbridges, nx_mag, ny_mag
 real, allocatable:: Bfield_tmp(:, :, :, :), magnetogram(:, :)
 real:: point1(0:2), point2(0:2), vp(0:2), bp(0:2), delta_mag
 logical:: xa_exist, ya_exist, za_exist, ifort_flag, curlB_out
-real:: t1, t2
 !----------------------------------------------------------------------------
 open(unit=8, file='head.txt', status='old')
 read(8, *) nx, ny, nz, nbridges, delta, maxsteps, &
@@ -973,14 +972,10 @@ endif
 ! read Bx, By, Bz
 allocate(Bfield(0:2, 0:nxm1, 0:nym1, 0:nzm1))
 allocate(Bfield_tmp( 0:nxm1, 0:nym1, 0:nzm1, 0:2))
-t1 = SECNDS(0.0)
 open(unit=8, file='b3d.bin', access='stream', status='old')
 read(8) Bfield_tmp
  close(8)
- t2 = SECNDS(t1)
-print*, t2, 'B read' 
  
-t1 = SECNDS(0.0) 
 inquire(iolength=reclen) 1.0 ! if reclen .eq. 4, compiled by gfortran; if reclen .eq. 1, compiled by ifort;
 ifort_flag=(reclen .eq. 1)
 
@@ -996,8 +991,6 @@ do k=0, nzm1
 	forall(s=0:2) Bfield(s,:,:,k)=Bfield_tmp(:,:,k,s)
 enddo
 !$OMP END PARALLEL DO
-t2 = SECNDS(t1)
-print*, t2, 'B transfer'
 
 deallocate(Bfield_tmp)
 
@@ -1112,7 +1105,6 @@ write(8, *) q0flag_int, cflag_int, vflag_int
 !----------------------------------------------------------------------------
 if (twistFlag .or. curlB_out) then
 	allocate(curlB(0:2, 0:nxm1, 0:nym1, 0:nzm1))
-	t1 = SECNDS(0.0)
 
 	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
 	do k=0, nzm1
@@ -1130,15 +1122,12 @@ if (twistFlag .or. curlB_out) then
 		close(8)
 		stop
 	endif
-	t2 = SECNDS(t1)	
-	print*, t2, 'curlB'
 endif
 !----------------------------------------------------------------------------
 grad3DFlag= .not. ( q0flag .and. (.not. scottFlag))
 
 if (grad3DFlag) then
 	allocate(grad_unit_vec_Bfield(0:2,0:2, 0:nxm1, 0:nym1, 0:nzm1))
-	t1 = SECNDS(0.0)
 	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
 	do k=0, nzm1
 	do j=0, nym1
@@ -1148,8 +1137,6 @@ if (grad3DFlag) then
 	enddo
 	enddo
 	!$OMP END PARALLEL DO
-	t2 = SECNDS(t1)
-	print*, t2, 'gradUVB'
 endif
 !----------------------------------------------------------------------------
 
