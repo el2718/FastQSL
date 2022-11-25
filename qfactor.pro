@@ -272,7 +272,7 @@ if ~file_test(odir) then file_mkdir, odir
 if curlB_out then begin
 	file_sav=odir+'curlB.sav'
 	if file_test(file_sav) then begin 
-		print, file_sav+' exist'
+		print, "'"+file_sav+"'"+' exist'
 		if ~preset_odir then dummy=temporary(odir)
 		return
 	endif
@@ -658,6 +658,7 @@ IF vflag THEN BEGIN
 		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
 		close, unit
+		
 		
 		slogq_tmp=slogq
 		ss=WHERE(FINITE(slogq, /NAN))		
