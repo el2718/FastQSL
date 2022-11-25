@@ -4,8 +4,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
              nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
 ;+
 ; PURPOSE:
-;   Calculate the squashing factor Q at the photosphere or a cross section
-;   or a box volume, given a 3D magnetic field with Cartesian, uniform or stretched grids
+;   Calculate the squashing factor Q at the photosphere or a cross section or a box volume, 
+;   given a 3D magnetic field with Cartesian, uniform or stretched grids
 ; 
 ;   For details see:
 ;   Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022, FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 937, 26
