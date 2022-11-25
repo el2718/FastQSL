@@ -82,7 +82,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   odir:       directory to save the results
 ;		
-;   fstr:       filename of the results; file_sav=odir+fstr+'.sav';
+;   fstr:       filename of the results; file_sav=odir+fstr+'.sav'
 ;
 ;   nbridges:   number of processors to engage; default is 8
 ; 
