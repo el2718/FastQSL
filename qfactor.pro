@@ -60,8 +60,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;               point1=[xreg[1],yreg[1],zreg[0]] ; point0 -> point1, first axis
 ;               point2=[xreg[0],yreg[0],zreg[1]] ; point0 -> point2, second axis
 ;               x{yz}reg[0] does not have to be smaller than x{yz}reg[1] in this case
-;
-;      
+;   
 ;   factor:     to bloat up the original resolution, i.e. grid spacing of output = 1/factor; default is 4 
 ;
 ;   delta:      grid spacing of output; default is 1/factor (when stretchFlag=0B); if it is set, the keyword factor will be ignored
