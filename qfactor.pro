@@ -84,7 +84,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		
 ;   fstr:       filename of the results; file_sav=odir+fstr+'.sav'
 ;
-;   nbridges:   number of processors to engage; default is !CPU.HW_NCPU-2
+;   nbridges:   number of processors to engage; default is !CPU.HW_NCPU - 2
 ; 
 ;   no_preview: don't produce PNG images for preview; default is 0B; 
 ;               If invoked, then this program can run with GDL (https://github.com/gnudatalanguage/gdl) because write_png is skipped.
