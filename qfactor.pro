@@ -83,7 +83,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
 ;
-;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; only calculate curlB then return
+;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; will only calculate curlB
 ;
 ;   nbridges:   number of processors to engage; default is 8
 ; 
