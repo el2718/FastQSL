@@ -1008,7 +1008,6 @@ if (stretchFlag) then
 	else	
 		vp_index=>vp_index0
 	endif
-	print*, uni_stretch_Flag
 	round_weight        =>round_weight_stretch
 	curlB_grid          =>curlB_grid_stretch
 	grad_unit_vec_B_grid=>grad_unit_vec_B_grid_stretch
@@ -1120,6 +1119,9 @@ if (twistFlag .or. curlB_out) then
 		open(unit=8, file='curlB.bin', access='stream', status='replace')
 		write(8) curlB
 		close(8)
+		round_weight        => null ()
+		curlB_grid          => null ()
+		grad_unit_vec_B_grid=> null ()
 		stop
 	endif
 endif
