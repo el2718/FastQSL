@@ -1122,6 +1122,7 @@ if (twistFlag .or. curlB_out) then
 		round_weight        => null ()
 		curlB_grid          => null ()
 		grad_unit_vec_B_grid=> null ()
+		if (stretchFlag) vp_index => null ()
 		stop
 	endif
 endif
