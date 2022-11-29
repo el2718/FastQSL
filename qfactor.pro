@@ -572,7 +572,6 @@ IF cFlag THEN BEGIN
 	ss2=where(reboundary ne 1)
 	if (ss1[0] ne -1) then qcs_orig[ss1]=!values.F_NAN
 	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
-
 	
 	if preview then begin
 		im=bytscl(alog10(qcs_orig>1.),min=0,max=5,/nan)
