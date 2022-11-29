@@ -657,8 +657,7 @@ IF vflag THEN BEGIN
 		slogq=fltarr(q1,q2)	
 		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
-		close, unit
-		
+		close, unit		
 		
 		slogq_tmp=slogq
 		ss=WHERE(FINITE(slogq, /NAN))		
