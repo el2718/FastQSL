@@ -78,7 +78,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		
 ;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
 ;
-;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; will only calculate curlB, then return
+;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz
 ;
 ;   odir:       directory to save the results
 ;		
@@ -248,8 +248,7 @@ if  keyword_set(twistFlag)  then twistFlag =1B else twistFlag =0B
 if  keyword_set(RK4Flag)    then RK4Flag   =1B else RK4Flag   =0B
 if  keyword_set(scottFlag)  then scottFlag =1B else scottFlag =0B
 if  keyword_set(curlB_out)  then curlB_out =1B else curlB_out =0B
-if  keyword_set(no_preview) then no_preview=1B else no_preview=0B
-preview=(not no_preview) and (not curlB_out)
+if  keyword_set(no_preview) then preview   =0B else preview   =1B
 if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
 if ~keyword_set(tol)        then tol=10.0^(-4.)
@@ -269,14 +268,10 @@ endif else begin
 endelse
 if ~file_test(odir) then file_mkdir, odir
 ;----------------------------------------------------------------------------------------------
-if curlB_out then begin
-	file_sav=odir+'curlB.sav'
-	if file_test(file_sav) then begin 
-		print, "'"+file_sav+"'"+' exist'
-		if ~preset_odir then dummy=temporary(odir)
-		return
-	endif
-endif
+; check the existence of curlB.sav
+file_curlB=odir+'curlB.sav'
+curlB_exist=file_test(file_curlB)
+if (curlB_out and (not curlB_exist)) then curlB_out_int=1L else curlB_out_int=0L
 ;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
@@ -290,7 +285,7 @@ get_lun,unit
 openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
 printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
-printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), long(curlB_out)
+printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), curlB_out_int
 close,  unit
 
 openw,  unit, tmp_dir+'b3d.bin'
@@ -389,9 +384,12 @@ endif else begin
 	
 	fstr = head_str + delta_str + cut_str
 endelse
+
+file_sav=odir+fstr+'.sav'
 ;----------------------------------------------------------------------------------------------
 ; save curlB
-if curlB_out then begin
+if curlB_exist then print, "'"+file_curlB+"' exist already"
+if curlB_out_int then begin
 	curlB=fltarr(3, nx, ny, nz)
 	openr, unit, tmp_dir+'curlB.bin'
 	readu, unit, curlB
@@ -401,12 +399,13 @@ if curlB_out then begin
 	curlBy=reform(curlB[1,*,*,*])
 	curlBz=reform(curlB[2,*,*,*])
 	
-	save, filename=file_sav, curlBx, curlBy, curlBz	
+	save, filename=file_curlB, curlBx, curlBy, curlBz
+		
 	; release the memory of curlB	
 	dummy=(temporary(curlB))[0]+(temporary(curlBx))[0]+(temporary(curlBy))[0]+(temporary(curlBz))[0]
-endif else begin
-	file_sav=odir+fstr+'.sav'
-endelse
+	
+	print, "curlB is saved in '"+file_curlB+"'"
+endif
 ;----------------------------------------------------------------------------------------------
 ; mark the area for calculation on the magnetogram
 if preview then begin
