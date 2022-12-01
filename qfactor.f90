@@ -60,7 +60,7 @@ END subroutine qfactor0_bridge
 
 
 subroutine qfactor0_calculate(i,j)
-!calculate the Q at the photosphere by Titov (2002), some problematic sites are filled by trace_scott
+!calculate Q at the photosphere by Titov (2002), some problematic sites are filled with trace_scott
 use qfactor_common
 use trace_common
 implicit none
