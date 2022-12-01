@@ -271,7 +271,7 @@ if ~file_test(odir) then file_mkdir, odir
 ; check the existence of curlB.sav
 file_curlB=odir+'curlB.sav'
 curlB_exist=file_test(file_curlB)
-if (curlB_out and (not curlB_exist)) then curlB_out_int=1L else curlB_out_int=0L
+if curlB_out and (not curlB_exist) then curlB_out_int=1L else curlB_out_int=0L
 ;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
@@ -675,7 +675,7 @@ IF vflag THEN BEGIN
 ENDIF 
 
 ;----------------------------------------------------------------------------------------------	
-; hourse keeping
+; house keeping
 file_delete, tmp_dir, /recursive
 free_lun, unit, /force
 if ~preset_odir then dummy=temporary(odir)
