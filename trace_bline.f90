@@ -78,7 +78,7 @@ integer:: i, index_i, index_j, index_k, binary_index, index_try
 vpBound=vp
 do i=0,2
 	if ( .not. (vpBound(i) .ge. pmin(i))) then 
-	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), comparing to vp(i) .lt. 0.0
+	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with to vp(i) .lt. 0.0
 		vpBound(i)=pmin(i)
 	else if ( vpBound(i) .ge. pmax(i)) then
 		vpBound(i)=pmax(i)
@@ -206,7 +206,7 @@ w(1,:)=vp-round(0,:)
 
 do i=0,2
 	if ( .not. (vp(i) .ge. 0.0)) then 
-	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), comparing to vp(i) .lt. 0.0
+	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with vp(i) .lt. 0.0
 		w(1,i)=0.0; round(0,i)=0  		
 	else if ( vp(i) .ge. pmax(i)) then
 		w(1,i)=1.0; round(0,i)=r0max(i)
@@ -1051,9 +1051,9 @@ if (stretchFlag) then
 	close(8)
 endif
 !----------------------------------------------------------------------------
-q0Flag=(zreg(0) .eq. zmin) .and. (zreg(1) .eq. zmin) .and. (.not. csflag) .and. (.not. curlB_out)
- vFlag=(xreg(1) .ne. xreg(0)) .and. (yreg(1) .ne. yreg(0)) .and. (zreg(1) .ne. zreg(0)) .and. (.not. csflag) .and. (.not. curlB_out)
- cFlag=(.not. vflag) .and. (.not. q0flag) .and. (.not. curlB_out)
+q0Flag=(zreg(0) .eq. zmin) .and. (zreg(1) .eq. zmin) .and. (.not. csflag)
+ vFlag=(xreg(1) .ne. xreg(0)) .and. (yreg(1) .ne. yreg(0)) .and. (zreg(1) .ne. zreg(0)) .and. (.not. csflag)
+ cFlag=(.not. vflag) .and. (.not. q0flag)
 
 if (csflag) then
 	Normal_index =-1
@@ -1119,11 +1119,7 @@ if (twistFlag .or. curlB_out) then
 		open(unit=8, file='curlB.bin', access='stream', status='replace')
 		write(8) curlB
 		close(8)
-		round_weight        => null ()
-		curlB_grid          => null ()
-		grad_unit_vec_B_grid=> null ()
-		if (stretchFlag) vp_index => null ()
-		stop
+		if (.not. twistFlag) deallocate(curlB)
 	endif
 endif
 !----------------------------------------------------------------------------
