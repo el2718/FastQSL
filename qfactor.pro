@@ -78,7 +78,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		
 ;   twistFlag:  to calculate twist number Tw; see Liu et al. (2016, ApJ); default is 0
 ;
-;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz
+;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; default is 0
 ;
 ;   odir:       directory to save the results
 ;		
