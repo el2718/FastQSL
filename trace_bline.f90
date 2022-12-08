@@ -78,7 +78,7 @@ integer:: i, index_i, index_j, index_k, binary_index, index_try
 vpBound=vp
 do i=0,2
 	if ( .not. (vpBound(i) .ge. pmin(i))) then 
-	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with to vp(i) .lt. 0.0
+	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with vp(i) .lt. 0.0
 		vpBound(i)=pmin(i)
 	else if ( vpBound(i) .ge. pmax(i)) then
 		vpBound(i)=pmax(i)
