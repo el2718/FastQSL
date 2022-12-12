@@ -1,6 +1,6 @@
 # FastQSL
 
-Since the server of http://staff.ustc.edu.cn/~rliu/qfactor.html will not more exist after September 2022, those codes (and their updates) will be updated on this site from July 2022.
+Since the server of http://staff.ustc.edu.cn/~rliu/qfactor.html is stopped from September 2022, those codes (and their updates) will be updated on this site from July 2022.
 
 A GPU version is also provided https://github.com/peijin94/FastQSL.
 
