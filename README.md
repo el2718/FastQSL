@@ -9,14 +9,21 @@ A GPU version is also provided https://github.com/peijin94/FastQSL.
 ### For *.pro
 * IDL https://www.l3harrisgeospatial.com/Software-Technology/IDL or
 * GDL https://gnudatalanguage.github.io
-  * note: Since GDL has problems of write_png, if run with it, the keyword /no_preview of qfactor.pro should be invoked.
+  * note: setting an environmental variable of GDL_PATH is necessary for write_png. 
+If you used one of the binary packages available for Linux then it depends on the distribution:  
+-Ubuntu & Fedora:  /usr/share/gnudatalanguage/lib   
+-ArchLinux: /usr/lib/gdl  
+-Gentoo: /usr/local/share/gdl   
+**Please append such line to '~/.bashrc'** (for Ubuntu)    
+export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
 ### For *.f90
 * ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran or
 * gfortran https://gcc.gnu.org/wiki/GFortran
 
 ## Usage
-Please see the beginning of qfactor.pro
+Please see the beginning of qfactor.pro  
+Also can find demos in demo_charge4.pro
 
 ## Cite as
 
