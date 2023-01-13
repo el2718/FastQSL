@@ -32,7 +32,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   please replace qfactor.x by qfactor.exe for the path specifing
 ;
 ; INPUTS
-;   Bx, By, Bz: 3D magnetic field, will be forcibly converted the to float arrays while writing 'b3d.bin'
+;   Bx, By, Bz: 3D magnetic field, will be forcibly converted to float arrays while writing 'b3d.bin'
 ;   
 ; OPTIONAL INPUTS  
 ;
