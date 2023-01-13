@@ -18,10 +18,10 @@ If you used one of the binary packages available for Linux then it depends on th
 export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
 ### For *.f90
-* ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran or
-  * note: Please append this line to '~/.bashrc'  
+* ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran
+  * note: please append this line to '~/.bashrc'  
   source /opt/intel/oneapi/setvars.sh intel64
-* gfortran https://gcc.gnu.org/wiki/GFortran
+* gfortran https://gcc.gnu.org/wiki/GFortran or
 
 ## Usage
 Please see the beginning of qfactor.pro  
