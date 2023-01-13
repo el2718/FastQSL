@@ -86,8 +86,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   nbridges:   number of processors to engage; default is !CPU.HW_NCPU - 2
 ; 
-;   no_preview: don't produce PNG images for preview; default is 0B; 
-;               If invoked, then this program can run with GDL (https://github.com/gnudatalanguage/gdl) because write_png is skipped.
+;   no_preview: don't produce PNG images for preview; default is 0B
 ;
 ;   tmpB:       use temporary() to Bx, By, Bz to reduce the memory occupation of 3D magnetic field in IDL after writing b3d.bin to tmp_dir; default is 0B
 ;
