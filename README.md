@@ -14,12 +14,12 @@ If you used one of the binary packages available for Linux then it depends on th
 -Ubuntu & Fedora:  /usr/share/gnudatalanguage/lib   
 -ArchLinux: /usr/lib/gdl  
 -Gentoo: /usr/local/share/gdl   
-**Please append such line to '~/.bashrc'** (for Ubuntu)    
+**Please append such line to ~/.bashrc** (for Ubuntu)    
 export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
 ### For *.f90
 * ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran
-  * note: please append this line to '~/.bashrc'  
+  * note: please append this line to ~/.bashrc   
   source /opt/intel/oneapi/setvars.sh intel64
 * gfortran https://gcc.gnu.org/wiki/GFortran or
 
