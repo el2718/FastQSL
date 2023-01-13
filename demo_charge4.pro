@@ -1,6 +1,6 @@
 pro bfield_charge4, bfile, scale, top
 
-spawn,'ls -d '+bfile, out, error_out
+spawn, 'ls -d '+bfile, out, error_out
 if (out ne '') then return
 
 h_scale=scale/2.
@@ -57,7 +57,7 @@ print, bfile+' is saved'
 end
 
 
-;model a quadrupole field file
+;create a quadrupole field file
 bfile='charge4.sav'
 scale=90
 top=60
@@ -80,11 +80,11 @@ ya=findgen(scale+1)*B_delta-length/2.0
 za=findgen(top+1)*B_delta
 
 qfactor, Bx, By, Bz, xa=xa, ya=ya, za=za, delta=B_delta/3, $
-xreg=[-2,0],yreg=[1,0],zreg=[0,2], /csflag, $
-fstr='tilted_cs',/rk4, step=2.0, odir= 'qfactor/', /twist, nbridges=4
+xreg=[-2,0], yreg=[1,0], zreg=[0,2], /csflag, $
+fstr='tilted_cs', /rk4, step=2.0, odir= 'qfactor/', /twist, nbridges=4
 
 ;An example of calculating in a box volume, and exporting curlB arrays
-qfactor, Bx, By, Bz, xreg=[scale/4,scale/2],yreg=[scale/9,scale/3],zreg=[top/4,top/2],$
+qfactor, Bx, By, Bz, xreg=[scale/4,scale/2], yreg=[scale/9,scale/3], zreg=[top/4,top/2],$
 delta=0.8, tol=1.0e-3, odir= 'qfactor',/curlB_out
 
 end
