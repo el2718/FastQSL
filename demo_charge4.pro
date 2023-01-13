@@ -5,7 +5,6 @@ if (out ne '') then return
 
 h_scale=scale/2.
 length=4.5
-h_length=length/2.
 B_delta=length/scale
 
 Bx=fltarr(scale+1,scale+1,top+1)
