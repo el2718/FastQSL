@@ -119,7 +119,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;                5 - end at xmin
 ;                6 - end at xmax
 ;                7 - others
-;   rboundary3d=rsboundary3d+8*reboundary3d, so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are photosphere; For saving storage
+;   rboundary3d=rsboundary3d+8*reboundary3d, so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are the photosphere; For saving storage
 ;
 ;   rF/rsF/reF: coordinates of mapping points (F:foot)
 ; 
