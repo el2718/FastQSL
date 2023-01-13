@@ -23,7 +23,7 @@ export GDL_PATH=/usr/share/gnudatalanguage/lib
 
 ## Usage
 Please see the beginning of qfactor.pro  
-* demos: demo_charge4.pro
+* Demos: demo_charge4.pro
 
 ## Cite as
 
