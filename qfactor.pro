@@ -160,8 +160,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Jul 24,2021 J. Chen, improve I/O between IDL and Fortran
 ;   Dec  1,2021 J. Chen, optimize the correction of foot point
 ;   Dec 13,2021 J. Chen, adjust tol or step by incline
-;   Dec 25,2021 J. Chen, remove the reliance of SolarSoftWare
-;   Jan 21,2022 J. Chen, fix a bug in trace_scott.f90 in case ny != nz
+;   Dec 25,2021 J. Chen, remove the reliance of Solar SoftWare
 ;   Jan 26,2022 J. Chen, fix a bug of RKF45 in case the difference between RK4 and RK5 is 0
 ;   Jan 30,2022 J. Chen, remove the color table of doppler_color_mix, due to the poor recognizability of green-white-yellow
 ;   Feb 16,2022 J. Chen, reduce the memory occupation for 3D case in qfactor.x
