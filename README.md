@@ -24,7 +24,7 @@ export GDL_PATH=/usr/share/gnudatalanguage/lib
 ## Usage
 Please see the beginning of qfactor.pro  
 * Demos:  
-  IDL> .run demo_charge4.pro
+  IDL> .r demo_charge4.pro
 
 ## Cite as
 
