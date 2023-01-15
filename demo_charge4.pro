@@ -1,7 +1,10 @@
 pro bfield_charge4, bfile, scale, top
 
 spawn, 'ls -d '+bfile, out, error_out
-if (out ne '') then return
+if (out ne '') then begin
+	print, "'"+bfile+"' exist already"
+	return
+endif
 
 h_scale=scale/2.
 length=4.5
@@ -52,7 +55,7 @@ By[*,h_scale+1:scale,*]=-reverse(By[*,0:h_scale-1,*],2)
 Bz[*,h_scale+1:scale,*]= reverse(Bz[*,0:h_scale-1,*],2)
 
 save, filename=bfile, Bx, By, Bz
-print, bfile+' is saved'
+print,  "'"+bfile+"' is saved"
 end
 
 
@@ -70,7 +73,7 @@ qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fst
 qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fstr='method2_y0', /scott
 
 ;An example of calculating in a cross section which is tilted to x-axis and y-axis, 
-;and with stretched (actually uniformed) grids
+;and with streched (actually uniformed) grids
 length=4.5
 B_delta=length/scale
 
@@ -82,9 +85,8 @@ qfactor, Bx, By, Bz, xa=xa, ya=ya, za=za, delta=B_delta/3, $
 xreg=[-2,0], yreg=[1,0], zreg=[0,2], /csflag, $
 fstr='tilted_cs', /rk4, step=2.0, odir= 'qfactor/', /twist, nbridges=4
 
-;An example of calculating in a box volume, and exporting curlB arrays
+;An example of calculating in a box volume, and exporting the curlB
 qfactor, Bx, By, Bz, xreg=[scale/4,scale/2], yreg=[scale/9,scale/3], zreg=[top/4,top/2], $
 delta=0.8, tol=1.0e-3, odir= 'qfactor',/curlB_out
 
 end
-
