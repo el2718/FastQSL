@@ -128,7 +128,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ; MODIFICATION HISTORY:
 ;   Developed by R. Liu, J. Chen and Peijing, Zhang @ USTC
 ;   
-;   Jun 30,2014 R. Liu @ USTC, IDL edition 
+;   Jun 30,2014 R. Liu @ USTC, IDL edition
 ;   Apr 21,2015 R. Liu and J. Chen, deal with field lines pass through the boundary other than bottom
 ;   Apr 29,2015 R. Liu and J. Chen, further optimization on shared memory
 ;   Apr 27,2015 R. Liu, qcs
