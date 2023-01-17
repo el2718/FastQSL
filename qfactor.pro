@@ -10,11 +10,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   For details see:
 ;   Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022, FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 937, 26
 ;
-; PROCEDURES USED:
-; ------IDL procedures used
-;   doppler_color
-;      
-; ------FORTRAN procedures used
+;   FORTRAN procedures used
 ;   qfactor.f90
 ;   trace_bline.f90
 ;   trace_scott.f90
@@ -24,8 +20,10 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
 ;
-;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency; -Ofast would be problematic for MacOS, then please substitutue -O3 for it;
-;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
+;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency;
+;   -Ofast would be problematic for MacOS, then please substitutue -O3 for it;
+;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, 
+;   or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
 ;   For Windows: (executing "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" in cmd first would be necessary)
 ;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
@@ -63,7 +61,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   factor:     to bloat up the original resolution, i.e. grid spacing of output = 1/factor; default is 4 
 ;
-;   delta:      grid spacing of output; default is 1/factor (when stretchFlag=0B); if it is set, the keyword factor will be ignored
+;   delta:      grid spacing of output; default is 1/factor (when stretchFlag=0B); 
+;               if it is set, the keyword factor will be ignored
 ;
 ;   RK4Flag:    to trace bline by RK4; default is 0B (RKF45)
 ;   			   
@@ -120,7 +119,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;                7 - others
 ;   rboundary3d=rsboundary3d+8*reboundary3d, so if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are the photosphere; For saving storage
 ;
-;   rF/rsF/reF: coordinates of mapping points (F:foot)
+;   rF/rsF/reF: coordinates of mapping points (F:foot); suggested by Jiang, Chaowei
 ; 
 ;   length: length of field lines
 ;
@@ -130,10 +129,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Developed by R. Liu, J. Chen and Peijing, Zhang @ USTC
 ;   
 ;   Jun 30,2014 R. Liu @ USTC, IDL edition 
-;   Jul  2,2014 R. Liu, introduce nchunks > nbridges to utilize idle child processes
 ;   Apr 21,2015 R. Liu and J. Chen, deal with field lines pass through the boundary other than bottom
 ;   Apr 29,2015 R. Liu and J. Chen, further optimization on shared memory
-;   Apr 30,2015 R. Liu, correct the size of qmap
 ;   Apr 27,2015 R. Liu, qcs
 ;   Jun 15,2015 J. Chen, Fortran Edition, correct foot points with RK4_Boundary
 ;   Jul  8,2015 J. Chen, q3d
@@ -148,20 +145,17 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Aug 28,2018 J. Chen, supplement Q at maginal points
 ;   May  1,2021 Peijing Zhang and J. Chen, trace field line with RKF45; RK4 is remainded, modify classic RK4 to the 3/8-rule RK4
 ;   May  1,2021 J. Chen, adapted to gfortran compiler
-;   Jun  1,2021 J. Chen, supplement Q at the point where surronding 4 points have different mapping planes;
-;                        forcibly convert the input Bx, By, Bz to float arrays in IDL (Real(4) in Fortran)
-;   Jun  5,2021 J. Chen, deal part of the points where surronding 4 points have different mapping planes with the method of Scott_2017_ApJ_848_117
+;   Jun  1,2021 J. Chen, forcibly convert the input Bx, By, Bz to float arrays in IDL (Real(4) in Fortran)
 ;   Jun 10,2021 J. Chen, provide a keyword of maxsteps for the case that has extremely long field lines
 ;   Jun 11,2021 J. Chen, add the coordinates of mapping points to '*.sav' data
 ;   Jun 13,2021 J. Chen, mark 0 for inside and 7 for others in 'subroutine vp_rboundary'
 ;   Jul  5,2021 J. Chen, switch the order of indexes of Bfield in trace_bline.f90 for a better efficiency
 ;   Jul  9,2021 J. Chen, provide the option with the method of Scott_2017_ApJ_848_117, and q_perp as an output
-;   Jul 24,2021 J. Chen, improve I/O between IDL and Fortran
 ;   Dec  1,2021 J. Chen, optimize the correction of foot point
 ;   Dec 13,2021 J. Chen, adjust tol or step by incline
 ;   Dec 25,2021 J. Chen, remove the reliance of Solar SoftWare
 ;   Jan 26,2022 J. Chen, fix a bug of RKF45 in case the difference between RK4 and RK5 is 0
-;   Jan 30,2022 J. Chen, remove the color table of doppler_color_mix, due to the poor recognizability of green-white-yellow
+;   Jan 30,2022 J. Chen, remove doppler_color_mix, due to the poor recognizability of green-white-yellow
 ;   Feb 16,2022 J. Chen, reduce the memory occupation for 3D case in qfactor.x
 ;   Apr 27,2022 J. Chen, 
 ;		(1) fix a bug of "segmentation fault" during the output of qfactor.x;
@@ -177,7 +171,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Oct 11,2022 J. Chen, adapt to Windows
 ;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
-;
+;   Jan 17,2023 J. Chen, realize doppler color in qfactor.pro, doppler_color.pro is not more necessary;
+;                        to aviod a error for a remote server: % TVLCT: Unable to open X Windows display
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -446,8 +441,11 @@ if preview then begin
 	if (stretchFlag) then length_top=sqrt((xa(nx-1)-xa(0))^2.0+(ya(ny-1)-ya(0))^2.0+(za(nz-1)-za(0))^2.0) $
 	                 else length_top=sqrt(nx^2.0+ny^2.0+nz^2.0)
 		         
-; load doppler_color table
-	doppler_color, redvector=r_doppler, greenvector=g_doppler, bluevector=b_doppler
+; load doppler color table
+	r_doppler=[indgen(127)*2, REPLICATE(255, 129)]
+	b_doppler=reverse(r_doppler)
+	g_doppler=[r_doppler[0:127],b_doppler[128:255]]
+
 endif
 
 ; Q at the photosphere ----------------------------------------------------------------------------------------------
