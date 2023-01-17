@@ -442,7 +442,7 @@ if preview then begin
 	                 else length_top=sqrt(nx^2.0+ny^2.0+nz^2.0)
 		         
 ; load doppler color table
-	r_doppler=[indgen(127)*2, REPLICATE(255, 129)]
+	r_doppler=byte([indgen(127)*2, REPLICATE(255, 129)])
 	b_doppler=reverse(r_doppler)
 	g_doppler=[r_doppler[0:127],b_doppler[128:255]]
 
