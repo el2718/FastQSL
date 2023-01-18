@@ -13,8 +13,8 @@ A GPU version is also provided https://github.com/peijin94/FastQSL.
 If you used one of the binary packages available for Linux then it depends on the distribution:  
 -Ubuntu & Fedora:  /usr/share/gnudatalanguage/lib   
 -ArchLinux: /usr/lib/gdl  
--Gentoo: /usr/local/share/gdl
--MacOS: /opt/local/share/gnudatalanguage/lib   
+-Gentoo: /usr/local/share/gdl  
+-MacOS: /opt/local/share/gnudatalanguage/lib  
 **Please append such line to ~/.bashrc** (for Ubuntu)    
 export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
