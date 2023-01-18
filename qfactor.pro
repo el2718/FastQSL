@@ -171,7 +171,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Oct 11,2022 J. Chen, adapt to Windows
 ;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
-;   Jan 17,2023 J. Chen, realize doppler color in qfactor.pro, doppler_color.pro is not more necessary;
+;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error for a remote server: % TVLCT: Unable to open X Windows display
 ;
 ;   This software is provided without any warranty. Permission to use,
