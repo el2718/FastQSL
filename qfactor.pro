@@ -87,10 +87,10 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ; 
 ;   no_preview: don't produce PNG images for preview; default is 0B
 ;
-;   tmpB:       use temporary() to Bx, By, Bz to reduce the memory occupation of 3D magnetic field in IDL after writing b3d.bin to tmp_dir; default is 0B
-;
 ;   RAMtmp:     use RAM (/dev/shm/tmp/) to speed up the data transmission, please only invoke it in Linux; default is 0B; 
 ;		if invoked, please run only one task of qfactor.pro simultaneously on one machine
+；
+;   tmpB:       apply temporary() to Bx, By, Bz to reduce the memory occupation of 3D magnetic field in IDL after writing b3d.bin to tmp_dir; default is 0B
 ;
 ;  memory occupation in qfactor.x: 
 ;       3D magnetic field + some 2D arrays + 3D curlB field (same as the occupation of the 3D magnetic field, when twistFlag=1B) +
