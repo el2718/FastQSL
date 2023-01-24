@@ -68,7 +68,7 @@ restore, bfile
 
 ;images of Figure 4 in Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022, ApJ, 937, 26
 qfactor, Bx, By, Bz, fstr='method1_z0'
-qfactor, Bx, By, Bz, fstr='method2_z0', /scottFlag
+qfactor, Bx, By, Bz, fstr='method2_z0', /scottFlag, /rk4
 qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fstr='method1_y0'
 qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fstr='method2_y0', /scott
 
