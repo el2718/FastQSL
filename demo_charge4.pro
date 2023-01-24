@@ -26,7 +26,7 @@ xi[*,1]=x4
 xi[*,2]=x3
 xi[*,3]=x2
 
-epsilon=[1.,-1.,1.,-1.]
+qi=[1.,-1.,1.,-1.]
 
 
 for i=-h_scale,0 do begin
@@ -36,7 +36,7 @@ for k=0, top do begin
 	Bp=fltarr(3)
 	for s=0,3 do begin
 		dx=x-xi[*,s]
-		Bp=Bp+epsilon[s]*dx/(total(dx^2.))^1.5
+		Bp=Bp+qi[s]*dx/(total(dx^2.))^1.5
 	endfor
 
 	Bx[i+h_scale,j+h_scale,k]=Bp[0]
