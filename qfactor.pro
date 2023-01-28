@@ -77,7 +77,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   scottFlag:  calculate Q and Q_perp by the method of Scott_2017_ApJ_848_117; default is 0B (method 3 of Pariat_2012_A&A_541_A78)
 ;		
-;   twistFlag:  to calculate twist number Tw; see  Liu_2016_ApJ_818_148; default is 0
+;   twistFlag:  to calculate twist number Tw; see Liu_2016_ApJ_818_148; default is 0
 ;
 ;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; default is 0
 ;
