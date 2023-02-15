@@ -1,7 +1,6 @@
 pro bfield_charge4, bfile, scale, top
 
-spawn, 'ls -d '+bfile, out, error_out
-if (out ne '') then begin
+if file_test(bfile) then begin
 	print, "'"+bfile+"' exist already"
 	return
 endif
