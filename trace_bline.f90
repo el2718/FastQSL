@@ -986,6 +986,7 @@ else
 	CALL OMP_set_num_threads(minval([4,nbridges])) 
 endif
 
+!switch the order of indexes for a better efficiency
 !$OMP PARALLEL DO  PRIVATE(k), schedule(DYNAMIC)
 do k=0, nzm1
 	forall(s=0:2) Bfield(s,:,:,k)=Bfield_tmp(:,:,k,s)
