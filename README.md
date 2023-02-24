@@ -16,8 +16,6 @@ Since the server of http://staff.ustc.edu.cn/~rliu/qfactor.html will stop, those
 
 A GPU version is also provided https://github.com/peijin94/FastQSL.
 
-FastQSL is free and open-source, distributed under the CC BY-NC-SA 4.0 license.
-
 -----------------------------
 ## Dependencies
 ### For *.pro
