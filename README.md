@@ -4,7 +4,7 @@ Since the server of http://staff.ustc.edu.cn/~rliu/qfactor.html will stop, those
 
 A GPU version is also provided https://github.com/peijin94/FastQSL.
 
-FastQSL is free and open-source software, distributed under the GPLv3+ license.
+FastQSL is free and open-source, distributed under the GPLv3+ license.
 
 -----------------------------
 ## Dependencies
