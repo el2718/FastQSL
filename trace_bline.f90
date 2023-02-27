@@ -1077,7 +1077,7 @@ else
 	qy=(yreg(1)-yreg(0))/delta+1
 	qz=(zreg(1)-zreg(0))/delta+1
 
-	if(vflag)then
+	if (vflag) then
 		q1=qx; q2=qy; Normal_index=2
 	endif
 	if (qx .eq. 1) then 
