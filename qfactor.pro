@@ -382,7 +382,7 @@ endelse
 file_sav=odir+fstr+'.sav'
 ;----------------------------------------------------------------------------------------------
 ; save curlB
-if curlB_out and curlB_exist then print, "'"+file_curlB+"' exist already"
+if curlB_out and curlB_exist then print, "'"+file_curlB+"' already exists"
 if curlB_out_int then begin
 	curlB=fltarr(3, nx, ny, nz)
 	openr, unit, tmp_dir+'curlB.bin'
