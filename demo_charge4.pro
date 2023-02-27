@@ -1,7 +1,7 @@
 pro bfield_charge4, bfile, scale, top
 
 if file_test(bfile) then begin
-	print, "'"+bfile+"' exist already"
+	print, "'"+bfile+"' already exists"
 	return
 endif
 
