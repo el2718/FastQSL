@@ -45,7 +45,7 @@ IDL> .r demo_charge4.pro
 
 ## Cite as
 
-* [Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022, FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 937, 26](https://iopscience.iop.org/article/10.3847/1538-4357/ac8d61)
+* [Zhang, P., Chen, J.*, Liu, R. and Wang, C., FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 2022, 937, 26](https://iopscience.iop.org/article/10.3847/1538-4357/ac8d61)
 
 ```bibtex
 @ARTICLE{2022ApJ...937...26Z,
