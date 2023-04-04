@@ -36,7 +36,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ; OPTIONAL INPUTS  
 ;
 ;   xa, ya, za:  coordinates of grids in 1D arrays. The size of xa, ya, za must be consistant with the size of the 3D magnetic field, 
-;                and the values in x{yz}a should increase by order
+;                and the values in x{yz}a should be increased by order
 ;   stretchFlag= keyword_set(xa) and keyword_set(ya) and keyword_set(za), which means bx, by, bz are on stretched grids, otherwise are on uniform grids; 
 ;                if invoked, the units of x{yz}reg, delta, length are same as x{yz}a, 
 ;                while the units of step and tol are the scale of a cell (a self-adaptive fashion that varying from cell to cell)
