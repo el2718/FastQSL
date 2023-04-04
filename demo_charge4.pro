@@ -72,7 +72,7 @@ qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fst
 qfactor, Bx, By, Bz, xreg=[0,scale], yreg=[scale/2,scale/2], zreg=[0,top/2], fstr='method2_y0', /scott
 
 ;An example of calculating in a cross section which is tilted to x-axis and y-axis, 
-;and with streched (actually uniformed) grids
+;and with stretched (actually uniformed) grids
 length=4.5
 B_delta=length/scale
 
