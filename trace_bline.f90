@@ -2,7 +2,7 @@ module qfactor_common
 implicit none
 	integer:: qx, qy, qz, q1, q2, q1m1, q2m1, Normal_index
 	integer(1), allocatable:: rsboundary(:,:), reboundary(:,:), rboundary_tmp(:, :), sign2d(:,:)
-	real:: xreg(0:1), yreg(0:1), zreg(0:1), cut_coordinate, delta, delta1, &
+	real:: xreg(0:1), yreg(0:1), zreg(0:1), cut_coordinate, delta, &
 	point0(0:2), ev1(0:2), ev2(0:2), ev3(0:2)
 	real, allocatable:: rsF(:, :, :), reF(:, :, :), bnr(:, :), &
 	q_perp(:,:), q(:, :), qtmp(:, :), norm(:,:), length(:, :), twist(:, :)
@@ -962,7 +962,6 @@ NaN =transfer(2143289344, 1.0)
 min_incline  =0.05
 min_step     =minval([step, delta])
 min_step_foot=min_step/2.0
-delta1	     =delta/2.0
 if  (RK4flag) then
 	maxsteps_foot=    step/min_step_foot*4
 else
