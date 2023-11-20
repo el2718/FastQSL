@@ -10,12 +10,12 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   For details see:
 ;   Zhang, P., Chen, J.*, Liu, R. and Wang, C., 2022, FastQSL: A Fast Computation Method for Quasi-separatrix Layers. The Astrophysical Journal, 937, 26
 ;
-;   FORTRAN procedures used
+; FORTRAN procedures used
 ;   qfactor.f90
 ;   trace_bline.f90
 ;   trace_scott.f90
 ;
-; ------COMPILATION 
+; COMPILATION 
 ;   For Linux and MacOS (either by ifort or gfortran): 
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
