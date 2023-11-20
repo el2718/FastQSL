@@ -45,13 +45,13 @@ endfor
 endfor
 endfor
 
-Bx[h_scale+1:scale,0:h_scale,*]= reverse(Bx[0:h_scale-1,0:h_scale,*],1)
-By[h_scale+1:scale,0:h_scale,*]=-reverse(By[0:h_scale-1,0:h_scale,*],1)
-Bz[h_scale+1:scale,0:h_scale,*]=-reverse(Bz[0:h_scale-1,0:h_scale,*],1)
+Bx[h_scale+1:scale,0:h_scale,*]= REVERSE(Bx[0:h_scale-1,0:h_scale,*],1)
+By[h_scale+1:scale,0:h_scale,*]=-REVERSE(By[0:h_scale-1,0:h_scale,*],1)
+Bz[h_scale+1:scale,0:h_scale,*]=-REVERSE(Bz[0:h_scale-1,0:h_scale,*],1)
 
-Bx[*,h_scale+1:scale,*]= reverse(Bx[*,0:h_scale-1,*],2)
-By[*,h_scale+1:scale,*]=-reverse(By[*,0:h_scale-1,*],2)
-Bz[*,h_scale+1:scale,*]= reverse(Bz[*,0:h_scale-1,*],2)
+Bx[*,h_scale+1:scale,*]= REVERSE(Bx[*,0:h_scale-1,*],2)
+By[*,h_scale+1:scale,*]=-REVERSE(By[*,0:h_scale-1,*],2)
+Bz[*,h_scale+1:scale,*]= REVERSE(Bz[*,0:h_scale-1,*],2)
 
 save, filename=bfile, Bx, By, Bz
 print,  "'"+bfile+"' is saved"
