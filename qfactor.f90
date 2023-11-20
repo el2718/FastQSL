@@ -330,7 +330,7 @@ use qfactor_common
 use trace_common
 implicit none
 real:: bp(0:2), bn_0, bn_s, bn_e, bnr_tmp, vp(0:2), rs(0:2), re(0:2), &
-twist0, line_length, L_ratio, q0, q_perp0, u0(0:2), v0(0:2), &
+twist0, line_length, q0, q_perp0, u0(0:2), v0(0:2), &
 vpa1(0:2), rsa1(0:2), rea1(0:2), vpa2(0:2), rsa2(0:2), rea2(0:2), &
 vpb1(0:2), rsb1(0:2), reb1(0:2), vpb2(0:2), rsb2(0:2), reb2(0:2), &
 nxx, nxy, nyx, nyy, sxx, sxy, syx, syy, exx, exy, eyx, eyy
@@ -355,10 +355,8 @@ endif
 boundary_mark=0
 where(  (pmin+delta .gt. vp) .and.  (pmax-delta .lt. vp) ) boundary_mark=1
 
-L_ratio=maxval(length(i-1:i+1, j-1:j+1))/minval(length(i-1:i+1, j-1:j+1))
 
-
-if (((norm(i,j) .ge. 10.0) .or. (L_ratio .ge. 1.1)) .and. (sum(boundary_mark) .eq. 0)) then
+if (sum(boundary_mark) .eq. 0) then
 !use the plane perpendicular to the field line
 	call interpolateB(vp, bp)
 
@@ -376,8 +374,8 @@ if (((norm(i,j) .ge. 10.0) .or. (L_ratio .ge. 1.1)) .and. (sum(boundary_mark) .e
 	u0(2)=dble(bp(0))*v0(1)-dble(bp(1))*v0(0)
 	u0   =u0/norm2(u0)
 	
-	vpa1=vp+delta1*u0; vpa2=vp-delta1*u0
-	vpb1=vp+delta1*v0; vpb2=vp-delta1*v0
+	vpa1=vp+delta*u0; vpa2=vp-delta*u0
+	vpb1=vp+delta*v0; vpb2=vp-delta*v0
 	
 	call trace_bline(vpa1, rsa1, rea1, rbsa1, rbea1, line_length, twist0, .false., 1.)	
 	call trace_bline(vpa2, rsa2, rea2, rbsa2, rbea2, line_length, twist0, .false., 1.)	
@@ -415,7 +413,7 @@ if (((norm(i,j) .ge. 10.0) .or. (L_ratio .ge. 1.1)) .and. (sum(boundary_mark) .e
 		bn_s=bp(s_index0)				
 		bnr_tmp=abs(bn_s*bn_e/(dble(bn_0)**2.))
 			
-		q(i,j) = (nxx*nxx + nxy*nxy + nyx*nyx + nyy*nyy) * bnr_tmp /((2.*delta1)**4.)
+		q(i,j) = (nxx*nxx + nxy*nxy + nyx*nyx + nyy*nyy) * bnr_tmp /((2.*delta)**4.)
 		return
 	endif	
 endif
