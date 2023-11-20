@@ -174,6 +174,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error for a remote server: % TVLCT: Unable to open X Windows display
+;   Nov 20,2023 J. Chen, change 'reverse' to 'REVERSE' for adapting the IDL in some new MacOS; 
+;                        optimalize subroutine check_pseudo_QSL
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -444,7 +446,7 @@ if preview then begin
 		         
 ; load doppler color table
 	r_doppler=[bindgen(127)*2B, REPLICATE(255B, 129)]
-	b_doppler=reverse(r_doppler)
+	b_doppler=REVERSE(r_doppler)
 	g_doppler=[r_doppler[0:127], b_doppler[128:255]]
 
 endif
