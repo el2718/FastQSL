@@ -131,7 +131,6 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   
 ;   Jun 30,2014 R. Liu @ USTC, IDL edition
 ;   Apr 21,2015 R. Liu and J. Chen, deal with field lines pass through the boundary other than bottom
-;   Apr 29,2015 R. Liu and J. Chen, further optimization on shared memory
 ;   Apr 27,2015 R. Liu, qcs
 ;   Jun 15,2015 J. Chen, Fortran Edition, correct foot points with RK4_Boundary
 ;   Jul  8,2015 J. Chen, q3d
@@ -168,13 +167,13 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Apr 29,2022 J. Chen, extract subroutine round_weigh() for interpolation
 ;   May 10,2022 J. Chen, determine qx, qy, qz, z0flag, cflag, vflag in qfactor.x
 ;   May 19,2022 J. Chen, check the existence of nulls on grids; add a keyword of RAMtmp
-;   Jun 10,2022 J. Chen, adapt to stretched grids
-;   Oct 11,2022 J. Chen, adapt to Windows
+;   Jun 10,2022 J. Chen, adapted to stretched grids
+;   Oct 11,2022 J. Chen, adapted to Windows
 ;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
-;                        to aviod an error for a remote server: % TVLCT: Unable to open X Windows display
-;   Nov 20,2023 J. Chen, change 'reverse' to 'REVERSE' for adapting the IDL in some new MacOS; 
+;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
+;   Nov 20,2023 J. Chen, change 'reverse' to 'REVERSE', to be compatible with the IDL in some new MacOS; 
 ;                        optimalize subroutine check_pseudo_QSL
 ;
 ;   This software is provided without any warranty. Permission to use,
