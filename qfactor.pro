@@ -104,7 +104,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   q_perp/q_perp3d:     q_perp in Titov 2007, ApJ, 660, 863
 ;
 ;   slogq/slogq_perp:    sign(Bz) x log_10(Q/Q_\perp); Calculated with all the field lines
-;   slogq_orig/slogq_perp_orig:  only include field lines with both footpoints on the photoshere
+;   slogq_orig/slogq_perp_orig:  only include field lines with both footpoints on the photosphere
 ;  
 ;   twist/twist3d:       twist number = \int \mu_0 J \cdot B /(4\pi) B^2 ds
 ;
