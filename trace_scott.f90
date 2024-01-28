@@ -57,18 +57,18 @@ subroutine grad_unit_vec_B_grid_stretch(i, j, k, grad_unit_vec_B)
 use field_common
 implicit none
 integer:: i, j, k, ci0, cj0, ck0, s, t
-real:: coef(-2:2, 0:2), grad_unit_vec_B(0:2,0:2)
+real:: coef(0:2, 0:2), grad_unit_vec_B(0:2,0:2)
 !----------------------------------------------------------------------------
 call diff_coefficent(i, j, k, ci0, cj0, ck0, coef)
 grad_unit_vec_B=0.0
 do s=0,2
 do t=0,2
 	grad_unit_vec_B(0,s)=grad_unit_vec_B(0,s)+&
-		coef(ci0+t, 0)*Bfield(s, i+ci0+t, j, k)/norm2(Bfield(:, i+ci0+t, j, k))
+		coef(t, 0)*Bfield(s, i+ci0+t, j, k)/norm2(Bfield(:, i+ci0+t, j, k))
 	grad_unit_vec_B(1,s)=grad_unit_vec_B(1,s)+&
-		coef(cj0+t, 1)*Bfield(s, i, j+cj0+t, k)/norm2(Bfield(:, i, j+cj0+t, k))
+		coef(t, 1)*Bfield(s, i, j+cj0+t, k)/norm2(Bfield(:, i, j+cj0+t, k))
 	grad_unit_vec_B(2,s)=grad_unit_vec_B(2,s)+&
-		coef(ck0+t, 2)*Bfield(s, i, j, k+ck0+t)/norm2(Bfield(:, i, j, k+ck0+t))		
+		coef(t, 2)*Bfield(s, i, j, k+ck0+t)/norm2(Bfield(:, i, j, k+ck0+t))		
 enddo
 enddo
 
@@ -90,7 +90,7 @@ unit_vec_bp= bp/norm2(bp)
 if (grad3DFlag) then
 	forall(i=0:2, j=0:2) grad_unit_vec_Bp(i,j)=sum(weight*grad_unit_vec_Bfield(i, j, round(:,0), round(:,1), round(:,2)))
 else
-!outputs are identical as the upper way, but don't requiring grad_unit_vec_Bfield.
+!the output is identical as the upper, but don't require grad_unit_vec_Bfield
 !the efficiency is 1/4.79(gfortran) or 1/2.21(ifort) times of the upper
 	do k=0,1
 	do j=0,1
@@ -142,7 +142,7 @@ endif
 
 if(alphaFlag) then
 	forall(i=0:2) CurlBp(i)=sum(weight*curlB(i, round(:,0), round(:,1), round(:,2)))
-	alpha=sum(DBLE(curlbp)*bp)/(sum(DBLE(bp)*bp))
+	alpha=dot_product(curlbp, bp)/dot_product(bp, bp)
 endif
 
 if (stretchFlag) then
@@ -345,7 +345,7 @@ if (rb .ne. 7) then
 	if (abs(dt) .ge. min_step_foot) then
 		call RK4_scott(dt, vector9_0, vector9, alpha, .false.)
 		vp=vector9(0:2)
-		do while( .not.( all(pmin<=vp .and. vp<=pmax)) .and. (abs(dt) .ge. min_step_foot) )
+		do while(.not.(all(pmin<=vp .and. vp<=pmax)) .and. (abs(dt) .ge. min_step_foot))
 			dt= dt*0.9
 			if (abs(dt) .ge. min_step_foot) call RK4_scott(dt, vector9_0, vector9, alpha, .false.)
 			vp=vector9(0:2)
@@ -397,18 +397,18 @@ end subroutine correct_foot_scott
 
 
 !Scott_2017_ApJ_848_117
-subroutine trace_scott(vp0, q0, q_perp0, rs, re, rbs, rbe, line_length, twist0, twistFlag)
+subroutine trace_scott(vp0, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, twistFlag)
 use trace_common
 implicit none
-real:: vp(0:2), vp0(0:2), q0, q_perp0, dt, dL, dL0, line_length, alpha, alpha0, twist0, dtwist, &
+real:: vp(0:2), vp0(0:2), q0, q_perp0, dt, dL, dL0, length0, alpha, alpha0, twist0, dtwist, &
 rs(0:2), re(0:2), Bn_s, Bn_e, b0_square, b0(0:2), bs(0:2), be(0:2), &
 vector9(0:8), vector9_0(0:8), vector9_1(0:8), vector9_s(0:8), vector9_e(0:8), &
 u0(0:2), us(0:2), ue(0:2), v0(0:2), vs(0:2), ve(0:2), vs1(0:2), ve1(0:2), us1(0:2), ue1(0:2)
 integer:: it, sign_dt, rb, rbe, rbs, e_index, s_index, maxdim, index1, index2
 logical:: z0flag, twistFlag
 !----------------------------------------------------------------------------
-twist0     =0.0
-line_length=0.0
+twist0 =0.0
+length0=0.0
 !----------------------------------------------------------------------------
 z0flag= vp0(2) .eq. zmin
 call interpolateB(vp0, b0)
@@ -422,12 +422,10 @@ index2=mod(maxdim+2,3)
 v0(maxdim)= b0(index1)
 v0(index1)=-b0(maxdim)
 v0(index2)=0.
-v0        =v0/norm2(v0)
 
-u0(0)=dble(b0(1))*v0(2)-dble(b0(2))*v0(1)
-u0(1)=dble(b0(2))*v0(0)-dble(b0(0))*v0(2)
-u0(2)=dble(b0(0))*v0(1)-dble(b0(1))*v0(0)
-u0   =u0/norm2(u0)
+v0=v0/norm2(v0)
+call cross_product(b0, v0, u0)
+u0=u0/norm2(u0)
 !----------------------------------------------------------------------------
 do sign_dt=-1, 1, 2	
 	vector9(0:2)=vp0
@@ -437,9 +435,9 @@ do sign_dt=-1, 1, 2
 	if (z0flag) then
 		if ( b0(2)*sign_dt .le. 0) then 
 			if (sign_dt .eq. -1) then
-				vector9_s=vector9; rbs=1
+				vector9_s=vector9; rbs=5
 			else
-				vector9_e=vector9; rbe=1
+				vector9_e=vector9; rbe=5
 			endif		
 			cycle
 		endif
@@ -454,9 +452,9 @@ do sign_dt=-1, 1, 2
 		dt=min_step*sign_dt
 	endif	
 	
-	do while( all(pmin<=vp .and. vp<=pmax) .and. abs(it) < maxsteps)
+	do while(all(pmin<=vp .and. vp<=pmax) .and. abs(it) < maxsteps)
 
-		line_length=line_length+dL		
+		length0=length0+dL		
 		
 		if (RK4flag) then  
 		 	call   RK4_scott(dt, vector9, vector9_1, alpha, twistflag)
@@ -484,7 +482,7 @@ do sign_dt=-1, 1, 2
 	call correct_foot_scott(vector9_0, vector9_1, sign_dt, rb)
 	
 	dL=norm2(vector9_1(0:2)-vector9_0(0:2))
-	line_length=line_length+dL
+	length0=length0+dL
 	
 	if (twistflag) then
 		vp=vector9_1(0:2)
@@ -506,25 +504,25 @@ if ((rbs .eq. 0) .or. (rbe .eq. 0) .or. (rbs .eq. 7) .or. (rbe .eq. 7)) then
 	q0=NaN; q_perp0=NaN
 	return 
 endif
-
+!----------------------------------------------------------------------------
 rs=vector9_s(0:2)
 call interpolateB(rs, bs)
-s_index=(6-rbs)/2
+s_index=(rbs-1)/2
 Bn_s=bs(s_index)
 us=vector9_s(3:5)
 vs=vector9_s(6:8)
 
 re=vector9_e(0:2)
 call interpolateB(re, be)
-e_index=(6-rbe)/2
+e_index=(rbe-1)/2
 Bn_e=be(e_index)
 ue=vector9_e(3:5)
 ve=vector9_e(6:8)
 
-us1=us-us(s_index)/bs(s_index)*bs
-vs1=vs-vs(s_index)/bs(s_index)*bs
-ue1=ue-ue(e_index)/be(e_index)*be
-ve1=ve-ve(e_index)/be(e_index)*be
+us1=us-us(s_index)/Bn_s*bs
+vs1=vs-vs(s_index)/Bn_s*bs
+ue1=ue-ue(e_index)/Bn_e*be
+ve1=ve-ve(e_index)/Bn_e*be
 
 q0      =abs(dot_product(Ue1,Ue1)*dot_product(Vs1,Vs1)  &
         +    dot_product(Us1,Us1)*dot_product(Ve1,Ve1)  &
@@ -539,6 +537,6 @@ vs1=vs-dot_product(vs,bs)/norm2(bs)*(bs/norm2(bs))
 q_perp0 =abs(dot_product(Ue1,Ue1)*dot_product(Vs1,Vs1)  &
         +    dot_product(Us1,Us1)*dot_product(Ve1,Ve1)  &
         -2.0*dot_product(Ue1,Ve1)*dot_product(Us1,Vs1))/&
-      (b0_square / (norm2(bs)*norm2(be)))
+            (b0_square / (norm2(bs)*norm2(be)))
      
 end subroutine trace_scott
