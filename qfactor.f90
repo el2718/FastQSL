@@ -222,11 +222,11 @@ subroutine qcs_calculate(i,j)
 use qfactor_common
 use trace_common
 implicit none
-integer:: i, j, k, rbs, rbe, maxdim, index1, index2, &
+integer:: i, j, k, rb, rb_index, rbs, rbe, maxdim, index1, index2, &
 s_index0, s_index1, s_index2, sign_s_index1, sign_s_index2, &
 e_index0, e_index1, e_index2, sign_e_index1, sign_e_index2, &
 rbsa1, rbea1, rbsa2, rbea2, rbsb1, rbeb1, rbsb2, rbeb2
-logical:: margin_flag1, margin_flag2, bkey, boundary_mark(1:6), &
+logical:: margin_flag1, margin_flag2, bkey, &
 bkeys1, bkeys2, bkeys11, bkeys12, bkeys21, bkeys22, &
 bkeye1, bkeye2, bkeye11, bkeye12, bkeye21, bkeye22
 real:: q0, q_perp0, length0, twist0, &
@@ -282,14 +282,7 @@ endif
 if (tangent_Flag(i,j)) then
 !use the plane perpendicular to the field line to calculate Q
 
-call ij2vp(i, j, vp)
-forall(k=0:2)
-	boundary_mark(1+2*k)=vp(k)<pmin(k)+delta
-	boundary_mark(2+2*k)=vp(k)>pmax(k)-delta
-endforall
-
-if (count(boundary_mark) .eq. 0) then
-
+	call ij2vp(i, j, vp)
 	call interpolateB(vp, bp)
 
 	maxdim=sum(maxloc(abs(bp)))-1
@@ -307,6 +300,15 @@ if (count(boundary_mark) .eq. 0) then
 	vpa1=vp+delta*u0; vpa2=vp-delta*u0
 	vpb1=vp+delta*v0; vpb2=vp-delta*v0
 	
+	call vp_rboundary(vpa1, rb, rb_index)
+	if (rb .ne. 0) goto 100
+	call vp_rboundary(vpa2, rb, rb_index)
+	if (rb .ne. 0) goto 100
+	call vp_rboundary(vpb1, rb, rb_index)
+	if (rb .ne. 0) goto 100
+	call vp_rboundary(vpb2, rb, rb_index)
+	if (rb .ne. 0) goto 100
+
 	call trace_bline(vpa1, rsa1, rea1, rbsa1, rbea1, length0, twist0, .false., 1.)	
 	call trace_bline(vpa2, rsa2, rea2, rbsa2, rbea2, length0, twist0, .false., 1.)	
 	call trace_bline(vpb1, rsb1, reb1, rbsb1, rbeb1, length0, twist0, .false., 1.)
@@ -335,7 +337,7 @@ if (count(boundary_mark) .eq. 0) then
 		return
 	endif
 endif
-endif
+100 continue
 !----------------------------------------------------------------------------
 if (bkey) then
 !use the cross section to calculate Q
@@ -484,8 +486,8 @@ real:: percent
 integer:: times(8)
 !----------------------------------------------------------------------------
 call date_and_time(VALUES=times)	
-print 600, percent, times(5), times(6), times(7)
-600 format( '         ', F6.2, '%        ' ,I2.2, ':', I2.2, ':', I2.2)
+print 200, percent, times(5), times(6), times(7)
+200 format( '         ', F6.2, '%        ' ,I2.2, ':', I2.2, ':', I2.2)
 end subroutine show_time
 
 
