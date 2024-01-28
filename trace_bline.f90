@@ -5,7 +5,7 @@ implicit none
 	real:: xreg(0:1), yreg(0:1), zreg(0:1), cut_coordinate, delta, &
 	point0(0:2), ev1(0:2), ev2(0:2), ev3(0:2)
 	real, allocatable:: rsF(:, :, :), reF(:, :, :), bnr(:, :), &
-	q_perp(:,:), q(:, :), qtmp(:, :), norm(:,:), length(:, :), twist(:, :)
+	q_perp(:,:), q(:, :), length(:, :), twist(:, :)
 	logical:: twistFlag, vflag, q0flag, cflag, csflag, scottFlag
 	logical, allocatable:: tangent_Flag(:, :)
 end module qfactor_common
@@ -80,7 +80,7 @@ do i=0,2
 	if ( .not. (vpBound(i) .ge. pmin(i))) then 
 	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with vp(i) .lt. 0.0
 		vpBound(i)=pmin(i)
-	else if ( vpBound(i) .ge. pmax(i)) then
+	else if (vpBound(i) .ge. pmax(i)) then
 		vpBound(i)=pmax(i)
 	endif
 enddo
@@ -107,7 +107,7 @@ do while(binary_index .ge. 1)
 	endif
 enddo
 
-if ((xp .ge. xa(index_try)) .and. (index_try .le. nxm2) ) then
+if ((xp .ge. xa(index_try)) .and. (index_try .le. nxm2)) then
 	index_i=index_try
 else
 	index_i=index_try-1
@@ -208,7 +208,7 @@ do i=0,2
 	if ( .not. (vp(i) .ge. 0.0)) then 
 	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with vp(i) .lt. 0.0
 		w(1,i)=0.0; round(0,i)=0  		
-	else if ( vp(i) .ge. pmax(i)) then
+	else if (vp(i) .ge. pmax(i)) then
 		w(1,i)=1.0; round(0,i)=r0max(i)
 	endif
 enddo
@@ -293,12 +293,12 @@ subroutine curlB_grid_stretch(i, j, k, CurlBp)
 use field_common
 implicit none
 integer:: i, j, k, ci0, cj0, ck0, s
-real:: gradBp(0:2,0:2), coef(-2:2, 0:2), CurlBp(0:2)
+real:: gradBp(0:2,0:2), coef(0:2, 0:2), CurlBp(0:2)
 !----------------------------------------------------------------------------
 call diff_coefficent(i, j, k, ci0, cj0, ck0, coef)
-forall(s=1:2)   gradBp(0,s)=sum(coef(ci0:ci0+2, 0)*Bfield(s, i+ci0:i+ci0+2, j, k))
-forall(s=0:2:2) gradBp(1,s)=sum(coef(cj0:cj0+2, 1)*Bfield(s, i, j+cj0:j+cj0+2, k))
-forall(s=0:1)   gradBp(2,s)=sum(coef(ck0:ck0+2, 2)*Bfield(s, i, j, k+ck0:k+ck0+2))
+forall(s=1:2)   gradBp(0,s)=sum(coef(:, 0)*Bfield(s, i+ci0:i+ci0+2, j, k))
+forall(s=0:2:2) gradBp(1,s)=sum(coef(:, 1)*Bfield(s, i, j+cj0:j+cj0+2, k))
+forall(s=0:1)   gradBp(2,s)=sum(coef(:, 2)*Bfield(s, i, j, k+ck0:k+ck0+2))
  curlBp(0)=gradBp(1,2)-gradBp(2,1)
  curlBp(1)=gradBp(2,0)-gradBp(0,2)
  curlBp(2)=gradBp(0,1)-gradBp(1,0)
@@ -309,81 +309,63 @@ subroutine diff_coefficent(i, j, k, ci0, cj0, ck0, coef)
 use trace_common
 implicit none
 integer:: i, j, k, ci0, cj0, ck0
-real:: coef(-2:2, 0:2)
+real:: coef(0:2, 0:2)
 !----------------------------------------------------------------------------
 if (i .eq. 0) then
- 	coef(-2,0)=0.0 
- 	coef(-1,0)=0.0
- 	coef( 0,0)=-(2.0*dxa(0)+dxa(1))/(dxa(0)*(dxa(0)+dxa(1)))
- 	coef( 1,0)=(dxa(0)+dxa(1))/(dxa(0)*dxa(1))
- 	coef( 2,0)=-dxa(0)/(dxa(1)*(dxa(0)+dxa(1)))
+ 	coef(0,0)=-(2.0*dxa(0)+dxa(1))/(dxa(0)*(dxa(0)+dxa(1)))
+ 	coef(1,0)=(dxa(0)+dxa(1))/(dxa(0)*dxa(1))
+ 	coef(2,0)=-dxa(0)/(dxa(1)*(dxa(0)+dxa(1)))
  	ci0=0
 else if (i .eq. nxm1) then 	
- 	coef(-2,0)=  dxa(nxm1-1)/(dxa(nxm1-2)*(dxa(nxm1-1)+dxa(nxm1-2)))
- 	coef(-1,0)=-(dxa(nxm1-1)+dxa(nxm1-2))/(dxa(nxm1-1)*dxa(nxm1-2))
- 	coef( 0,0)= (2.0*dxa(nxm1-1)+dxa(nxm1-2))/(dxa(nxm1-1)*(dxa(nxm1-1)+dxa(nxm1-2)))
- 	coef( 1,0)=0.0
- 	coef( 2,0)=0.0
+ 	coef(0,0)=  dxa(nxm1-1)/(dxa(nxm1-2)*(dxa(nxm1-1)+dxa(nxm1-2)))
+ 	coef(1,0)=-(dxa(nxm1-1)+dxa(nxm1-2))/(dxa(nxm1-1)*dxa(nxm1-2))
+ 	coef(2,0)= (2.0*dxa(nxm1-1)+dxa(nxm1-2))/(dxa(nxm1-1)*(dxa(nxm1-1)+dxa(nxm1-2)))
  	ci0=-2
 else
-	coef(-2,0)=0.0
-	coef(-1,0)=-dxa(i)/(dxa(i-1)*(dxa(i)+dxa(i-1)))
-	coef( 0,0)=(dxa(i)-dxa(i-1))/(dxa(i)*dxa(i-1))
-	coef( 1,0)= dxa(i-1)/(dxa(i)*(dxa(i)+dxa(i-1)))
-	coef( 2,0)=0.0
+	coef(0,0)=-dxa(i)/(dxa(i-1)*(dxa(i)+dxa(i-1)))
+	coef(1,0)=(dxa(i)-dxa(i-1))/(dxa(i)*dxa(i-1))
+	coef(2,0)= dxa(i-1)/(dxa(i)*(dxa(i)+dxa(i-1)))
 	ci0=-1
 endif
 !----------------------------------------------------------------------------
 if (j .eq. 0) then
- 	coef(-2,1)=0.0 
- 	coef(-1,1)=0.0
- 	coef( 0,1)=-(2.0*dya(0)+dya(1))/(dya(0)*(dya(0)+dya(1)))
- 	coef( 1,1)=(dya(0)+dya(1))/(dya(0)*dya(1))
- 	coef( 2,1)=-dya(0)/(dya(1)*(dya(0)+dya(1)))
+ 	coef(0,1)=-(2.0*dya(0)+dya(1))/(dya(0)*(dya(0)+dya(1)))
+ 	coef(1,1)=(dya(0)+dya(1))/(dya(0)*dya(1))
+ 	coef(2,1)=-dya(0)/(dya(1)*(dya(0)+dya(1)))
  	cj0=0
 else if (j .eq. nym1) then
- 	coef(-2,1)=  dya(nym1-1)/(dya(nym1-2)*(dya(nym1-1)+dya(nym1-2)))
- 	coef(-1,1)=-(dya(nym1-1)+dya(nym1-2))/(dya(nym1-1)*dya(nym1-2))
- 	coef( 0,1)= (2.0*dya(nym1-1)+dya(nym1-2))/(dya(nym1-1)*(dya(nym1-1)+dya(nym1-2)))
-	coef( 1,1)=0.0
- 	coef( 2,1)=0.0
+ 	coef(0,1)=  dya(nym1-1)/(dya(nym1-2)*(dya(nym1-1)+dya(nym1-2)))
+ 	coef(1,1)=-(dya(nym1-1)+dya(nym1-2))/(dya(nym1-1)*dya(nym1-2))
+ 	coef(2,1)= (2.0*dya(nym1-1)+dya(nym1-2))/(dya(nym1-1)*(dya(nym1-1)+dya(nym1-2)))
  	cj0=-2
 else
-	coef(-2,1)=0.0
-	coef(-1,1)=-dya(j)/ (dya(j-1)*(dya(j)+dya(j-1)))
-	coef( 0,1)=(dya(j)-dya(j-1))/(dya(j)*dya(j-1))
-	coef( 1,1)= dya(j-1)/ (dya(j)*(dya(j)+dya(j-1)))
-	coef( 2,1)=0.0
+	coef(0,1)=-dya(j)/ (dya(j-1)*(dya(j)+dya(j-1)))
+	coef(1,1)=(dya(j)-dya(j-1))/(dya(j)*dya(j-1))
+	coef(2,1)= dya(j-1)/ (dya(j)*(dya(j)+dya(j-1)))
 	cj0=-1
 endif
 !----------------------------------------------------------------------------
 if (k .eq. 0) then
- 	coef(-2,2)=0.0
- 	coef(-1,2)=0.0
- 	coef( 0,2)=-(2*dza(0)+dza(1))/(dza(0)*(dza(0)+dza(1)))
- 	coef( 1,2)=(dza(0)+dza(1))/(dza(0)*dza(1))
- 	coef( 2,2)=-dza(0)/(dza(1)*(dza(0)+dza(1)))
+ 	coef(0,2)=-(2*dza(0)+dza(1))/(dza(0)*(dza(0)+dza(1)))
+ 	coef(1,2)=(dza(0)+dza(1))/(dza(0)*dza(1))
+ 	coef(2,2)=-dza(0)/(dza(1)*(dza(0)+dza(1)))
  	ck0=0
 else if (k .eq. nzm1) then 	
- 	coef(-2,2)=  dza(nzm1-1)/(dza(nzm1-2)*(dza(nzm1-1)+dza(nzm1-2))) 
- 	coef(-1,2)=-(dza(nzm1-1)+dza(nzm1-2))/(dza(nzm1-1)*dza(nzm1-2))
- 	coef( 0,2)= (2*dza(nzm1-1)+dza(nzm1-2))/(dza(nzm1-1)*(dza(nzm1-1)+dza(nzm1-2)))
- 	coef( 1,2)=0.0 
- 	coef( 2,2)=0.0
+ 	coef(0,2)=  dza(nzm1-1)/(dza(nzm1-2)*(dza(nzm1-1)+dza(nzm1-2))) 
+ 	coef(1,2)=-(dza(nzm1-1)+dza(nzm1-2))/(dza(nzm1-1)*dza(nzm1-2))
+ 	coef(2,2)= (2*dza(nzm1-1)+dza(nzm1-2))/(dza(nzm1-1)*(dza(nzm1-1)+dza(nzm1-2)))
  	ck0=-2
 else
-	coef(-2,2)=0.0
-	coef(-1,2)=-dza(k)/ (dza(k-1)*(dza(k)+dza(k-1)))
-	coef( 0,2)=(dza(k)-dza(k-1))/(dza(k)*dza(k-1))
-	coef( 1,2)= dza(k-1)/ (dza(k)*(dza(k)+dza(k-1)))
-	coef( 2,2)=0.0
+	coef(0,2)=-dza(k)/ (dza(k-1)*(dza(k)+dza(k-1)))
+	coef(1,2)=(dza(k)-dza(k-1))/(dza(k)*dza(k-1))
+	coef(2,2)= dza(k-1)/ (dza(k)*(dza(k)+dza(k-1)))
 	ck0=-1
 endif
 
 end subroutine diff_coefficent
 
 
-!! trilinear interpolation
+! trilinear interpolation
 subroutine interpolateB(vp, bp)
 use field_common
 use trace_common
@@ -420,7 +402,7 @@ integer:: round(0:1,0:2), i
 call round_weight(vp, round, weight)
 forall(i=0:2) Bp(i)=sum(weight*Bfield(i, round(:,0), round(:,1), round(:,2)))
 forall(i=0:2) CurlBp(i)=sum(weight*curlB(i, round(:,0), round(:,1), round(:,2)))
-alpha=sum(DBLE(curlbp)*bp)/(sum(DBLE(bp)*bp))
+alpha=dot_product(curlbp, bp)/dot_product(bp, bp)
 end subroutine interpolateAlpha
 
 
@@ -436,7 +418,7 @@ call round_weight(vp, round, weight)
 forall(i=0:2) Bp(i)=sum(weight*Bfield(i, round(:,0), round(:,1), round(:,2)))
 if(alphaFlag) then
 	forall(i=0:2) CurlBp(i)=sum(weight*curlB(i, round(:,0), round(:,1), round(:,2)))
-	alpha=sum(DBLE(curlbp)*bp)/(sum(DBLE(bp)*bp))
+	alpha=dot_product(curlbp, bp)/dot_product(bp, bp)
 endif
 unit_vec_bp= bp/norm2(bp)
 
@@ -578,67 +560,24 @@ end subroutine RKF45
 subroutine vp_rboundary(vp, rb, rb_index)
 use trace_common
 implicit none
-real:: vp(0:2), xp, yp, zp
-integer:: rb, rb_index
+real:: vp(0:2)
+integer:: k, rb, rb_index
+logical:: boundary_mark(1:6)
 !----------------------------------------------------------------------------
-if (all(pmin<=vp .and. vp<=pmax)) then
-	rb=0
-	return
-endif
+forall(k=0:2)
+	boundary_mark(1+2*k)=vp(k)<pmin(k)
+	boundary_mark(2+2*k)=vp(k)>pmax(k)
+endforall
 
-xp=vp(0)
-yp=vp(1)
-zp=vp(2)
-  
-if ((xp .ge. xmin) .and. (xp .le. xmax) .and. &
-    (yp .ge. ymin) .and. (yp .le. ymax) .and. &
-    (zp .lt. zmin)) then 
-      rb=1
-      rb_index=2
-      return
-endif
-
-if ((xp .ge. xmin) .and. (xp .le. xmax) .and. &
-    (yp .ge. ymin) .and. (yp .le. ymax) .and. &
-    (zp .gt. zmax)) then 
-      rb=2
-      rb_index=2
-      return
-endif
-
-if ((xp .ge. xmin) .and. (xp .le. xmax) .and. &
-    (yp .lt. ymin) .and. &
-    (zp .ge. zmin) .and. (zp .le. zmax)) then 
-      rb=3
-      rb_index=1
-      return
-endif
-
-if ((xp .ge. xmin) .and. (xp .le. xmax) .and. &
-    (yp .gt. ymax) .and. &
-    (zp .ge. zmin) .and. (zp .le. zmax)) then 
-      rb=4
-      rb_index=1
-      return
-endif
-
-if ((xp .lt. xmin) .and. &
-    (yp .ge. ymin) .and. (yp .le. ymax) .and. &
-    (zp .ge. zmin) .and. (zp .le. zmax)) then 
-      rb=5
-      rb_index=0
-      return
-endif
-
-if ((xp .gt. xmax) .and. &
-    (yp .ge. ymin) .and. (yp .le. ymax) .and. &
-    (zp .ge. zmin) .and. (zp .le. zmax)) then 
-      rb=6
-      rb_index=0
-      return
-endif
-
-rb=7
+select case(count(boundary_mark))
+	case(0)
+		rb=0  !inside
+	case(1)
+	    rb=FINDLOC(boundary_mark, .true., 1)
+		rb_index=(rb-1)/2
+	case default
+		rb=7
+end select
 
 end subroutine vp_rboundary
 
@@ -680,7 +619,7 @@ if (rb .ne. 7) then
 		call RK4(dt, vp0, vp, alpha, .false.)
 		do while( .not.( all(pmin<=vp .and. vp<=pmax)) .and. (abs(dt) .ge. min_step_foot) )
 			dt= dt*0.9
-			if (abs(dt) .ge. min_step_foot)  call RK4(dt, vp0, vp, alpha, .false.)
+			if (abs(dt) .ge. min_step_foot) call RK4(dt, vp0, vp, alpha, .false.)
 		enddo
 	endif
 endif
@@ -725,7 +664,7 @@ endif
 end subroutine correct_foot
 
 
-subroutine trace_bline(vp0, rs, re, rbs, rbe, line_length, twist0, twistFlag, incline)
+subroutine trace_bline(vp0, rs, re, rbs, rbe, length0, twist0, twistFlag, incline)
 !+
 ! NAME :
 !   trace_bline
@@ -736,24 +675,23 @@ subroutine trace_bline(vp0, rs, re, rbs, rbe, line_length, twist0, twistFlag, in
 !INPUTS:
 !     vp0        - the position to start the line at
 !     twistFlag  - compute the twist or not
-!     incline    - abs(bn/ norm2(bp)) at the cross section, for adjusting step or tol
+!     incline    - abs(bn/norm2(bp)) at the cross section, for adjusting step or tol
 
 !OUTPUTS:
-!     rs           - pixel coordinates of the start point of field lines
-!     re           - pixel coordinates of the end point of field lines
-!     rbs,rbe      - categorize field lines based on where they thread the boundary of the field cube
-!     line_length  -length of the field line
-!     twist0       - twist number of the field line
+!     rs,  re    - pixel coordinates of the start/end point of field lines
+!     rbs, rbe   - categorize field lines based on where they thread the boundary of the field cube
+!     length0    - length of the field line
+!     twist0     - twist number of the field line
 !-
 use trace_common
 implicit none
-real:: vp0(0:2), vp1(0:2), vp(0:2), vp_tmp(0:2), rs(0:2), re(0:2), bp(0:2), dt, dL, dL0, line_length, &
+real:: vp0(0:2), vp1(0:2), vp(0:2), vp_tmp(0:2), rs(0:2), re(0:2), bp(0:2), dt, dL, dL0, length0, &
 dtwist, twist0, alpha, alpha0, tol_this, tol_this1, step_this, incline, incline_this
 integer:: it, sign_dt, rb, rbs, rbe
 logical:: twistFlag, z0Flag
 !----------------------------------------------------------------------------
-twist0=0.
-line_length=0.
+twist0 =0.
+length0=0.
 !----------------------------------------------------------------------------
 z0flag= vp0(2) .eq. zmin
 
@@ -777,9 +715,9 @@ do sign_dt=-1,1,2
 		call interpolateB(vp0, bp)		
 		if (bp(2)*sign_dt .le. 0) then
 			if (sign_dt .eq. -1) then
-				rs=vp0; rbs=1
+				rs=vp0; rbs=5
 			else
-				re=vp0; rbe=1
+				re=vp0; rbe=5
 			endif		
 			cycle
 		endif
@@ -789,8 +727,8 @@ do sign_dt=-1,1,2
 	it=0
 	dt=step_this*sign_dt
 	dL=0.
-	do while( all(pmin<=vp .and. vp<=pmax) .and. it < maxsteps)
-		line_length=line_length+dL
+	do while (all(pmin<=vp .and. vp<=pmax) .and. it < maxsteps)
+		length0=length0+dL
 		
 		if (RK4flag) then  
 		 	call RK4  (dt, vp, vp1, alpha, twistflag) 
@@ -819,7 +757,7 @@ do sign_dt=-1,1,2
 	
 	dL=norm2(vp1-vp_tmp)
 	
-	line_length=line_length+dL
+	length0=length0+dL
 	if (twistflag) then 
 		call interpolateAlpha(vp1, alpha)
 		dtwist=(alpha0+alpha)/2.*dL
@@ -836,20 +774,6 @@ enddo
 if (twistflag) twist0=twist0/(4.0*pi)
 
 END subroutine trace_bline
-
-
-subroutine logical2int(logical_in, interger_out)
-implicit none
-logical:: logical_in
-integer:: interger_out
-!----------------------------------------------------------------------------
-if (logical_in) then
-	interger_out=1
-else
-	interger_out=0
-endif
-
-end subroutine logical2int
 
 
 subroutine read_ax()
@@ -876,17 +800,9 @@ allocate(dxa(0:nxm2))
 allocate(dya(0:nym2))
 allocate(dza(0:nzm2))
 
-DO i=0,nxm2
-	dxa(i)=xa(i+1)-xa(i)
-enddo
-
-DO j=0,nym2
-	dya(j)=ya(j+1)-ya(j)
-enddo
-
-DO k=0,nzm2
-	dza(k)=za(k+1)-za(k)
-enddo
+forall(i=0:nxm2) dxa(i)=xa(i+1)-xa(i)
+forall(j=0:nym2) dya(j)=ya(j+1)-ya(j)
+forall(k=0:nzm2) dza(k)=za(k+1)-za(k)
 
 xmin=xa(0); xmax=xa(nxm1)
 ymin=ya(0); ymax=ya(nym1)
@@ -914,6 +830,27 @@ else
 endif
 
 end subroutine read_ax
+
+
+subroutine logical2int(logical_in, interger_out)
+implicit none
+logical:: logical_in
+integer:: interger_out
+if (logical_in) then
+	interger_out=1
+else
+	interger_out=0
+endif
+end subroutine logical2int
+
+
+subroutine cross_product(v1, v2, v3)
+implicit none
+real:: v1(0:2), v2(0:2), v3(0:2)
+v3(0)=dble(v1(1))*v2(2)-dble(v1(2))*v2(1)
+v3(1)=dble(v1(2))*v2(0)-dble(v1(0))*v2(2)
+v3(2)=dble(v1(0))*v2(1)-dble(v1(1))*v2(0)
+end subroutine cross_product
 
 
 subroutine initialize()
@@ -962,7 +899,7 @@ NaN =transfer(2143289344, 1.0)
 min_incline  =0.05
 min_step     =minval([step, delta])
 min_step_foot=min_step/2.0
-if  (RK4flag) then
+if (RK4flag) then
 	maxsteps_foot=    step/min_step_foot*4
 else
 	maxsteps_foot=min_step/min_step_foot*4
@@ -975,7 +912,8 @@ open(unit=8, file='b3d.bin', access='stream', status='old')
 read(8) Bfield_tmp
  close(8)
  
-inquire(iolength=reclen) 1.0 ! if reclen .eq. 4, compiled by gfortran; if reclen .eq. 1, compiled by ifort;
+! if reclen .eq. 4, compiled by gfortran; if reclen .eq. 1, compiled by ifort
+inquire(iolength=reclen) 1.0 
 ifort_flag=(reclen .eq. 1)
 
 if (ifort_flag) then 
@@ -1065,12 +1003,10 @@ if (csflag) then
 	q2=norm2(point2-point0)/delta+1
 	qx=0; qy=0; qz=0
 	!ev*: elementary vector of the cut plane
-	ev1   =(point1-point0)/norm2(point1-point0)
-	ev2   =(point2-point0)/norm2(point2-point0)
-	ev3(0)=dble(ev1(1))*ev2(2)-dble(ev1(2))*ev2(1)
-	ev3(1)=dble(ev1(2))*ev2(0)-dble(ev1(0))*ev2(2)
-	ev3(2)=dble(ev1(0))*ev2(1)-dble(ev1(1))*ev2(0)
-	ev3   =ev3/norm2(ev3)
+	ev1=(point1-point0)/norm2(point1-point0)
+	ev2=(point2-point0)/norm2(point2-point0)
+	call cross_product(ev1, ev2, ev3)
+	ev3=ev3/norm2(ev3)
 else
 	qx=(xreg(1)-xreg(0))/delta+1
 	qy=(yreg(1)-yreg(0))/delta+1
@@ -1123,10 +1059,9 @@ if (twistFlag .or. curlB_out) then
 	endif
 endif
 !----------------------------------------------------------------------------
-grad3DFlag= .not. ( q0flag .and. (.not. scottFlag))
-
+grad3DFlag= scottFlag .or. vflag
 if (grad3DFlag) then
-	allocate(grad_unit_vec_Bfield(0:2,0:2, 0:nxm1, 0:nym1, 0:nzm1))
+	allocate(grad_unit_vec_Bfield(0:2, 0:2, 0:nxm1, 0:nym1, 0:nzm1))
 	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
 	do k=0, nzm1
 	do j=0, nym1
@@ -1152,9 +1087,7 @@ if (scottFlag) allocate(q_perp(0:q1m1, 0:q2m1))
 if (vflag .or. cflag) then
 	allocate(rsboundary(-2:q1+1, -2:q2+1))
 	allocate(rsF(0:2, 0:q1m1, 0:q2m1))
-	allocate(        qtmp(0:q1m1, 0:q2m1))
-	allocate(tangent_Flag(0:q1m1, 0:q2m1))
-	allocate(        norm(0:q1m1, 0:q2m1))
+	allocate(tangent_Flag(-1:q1, -1:q2))
 endif
 
 end subroutine initialize
