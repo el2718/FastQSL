@@ -28,7 +28,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   please replace qfactor.x by qfactor.exe for the path specifing
 ;
 ;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency;
-;   -Ofast would be problematic for MacOS, then please substitutue -O3 for it; 
+;   -Ofast would be problematic for some compilers, then please substitutue -O3 for it; 
 ;
 ; INPUTS
 ;   Bx, By, Bz: 3D magnetic field, will be forcibly converted to float arrays while writing 'b3d.bin'
