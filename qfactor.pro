@@ -1,4 +1,4 @@
-PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag, $
+PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag,     $
              factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, maxsteps=maxsteps, $
              scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out, odir=odir, fstr=fstr, $
              nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
@@ -20,7 +20,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
 ;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
 ;
-;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in this file, 
+;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in qfactor.pro, 
 ;   or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
 ;
 ;   For Windows: (executing "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" in cmd first would be necessary)
@@ -109,16 +109,16 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   twist/twist3d:       twist number = \int \mu_0 J \cdot B /(4\pi) B^2 ds
 ;
 ;   rboundary/rsboundary/reboundary: (r:remote, s:start point, e:end point)
-;                nature of the ends of field lines, see 'subroutine vp_rboundary' in trace_bline.f90
-;                0 - inside
-;                1 - end at zmin
-;                2 - end at zmax
-;                3 - end at ymin
-;                4 - end at ymax
-;                5 - end at xmin
-;                6 - end at xmax
-;                7 - others
-;   rboundary3d=rsboundary3d+8*reboundary3d, for saving storage; So if rboundary3d[i, j, k] eq 9B, both two mapping surfaces of q3d[i, j, k] are the photosphere
+;             nature of the ends of field lines, see 'subroutine vp_rboundary' in trace_bline.f90
+;             0 - inside
+;             1 - end at xmin
+;             2 - end at xmax
+;             3 - end at ymin
+;             4 - end at ymax
+;             5 - end at zmin
+;             6 - end at zmax
+;             7 - others
+;   rboundary3d=rsboundary3d+8*reboundary3d, for saving storage
 ;
 ;   rF/rsF/reF: coordinates of mapping points (F:foot); suggested by Jiang, Chaowei
 ; 
@@ -135,15 +135,12 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Jun 15,2015 J. Chen, Fortran Edition, correct foot points with RK4_Boundary
 ;   Jul  8,2015 J. Chen, q3d
 ;   Oct 29,2015 J. Chen, deal with field lines touching the cut plane: use the plane quasi-perp to the field line  
-;   Nov 1, 2015 J. Chen,
-;		(1) fuse qcs and qfactor in qfactor.f90;  
-;		(2) the cross section can be paralleled to the photosphere;
-;		(3) set tmp_dir;	  
+;   Nov 1, 2015 J. Chen, fuse qcs and qfactor(z=0) in qfactor.f90
 ;   Nov 4, 2015 J. Chen, introduce rboundary3d				
 ;   Jun 22,2016 J. Chen, add the map of field line length
 ;   Oct 30,2017 J. Chen, add the map of Bnr
 ;   Aug 28,2018 J. Chen, supplement Q at maginal points
-;   May  1,2021 Peijing Zhang and J. Chen, trace field line with RKF45; RK4 is remainded, modify classic RK4 to the 3/8-rule RK4
+;   May  1,2021 Peijing Zhang and J. Chen, trace field line with RKF45; RK4 is remainded, classic RK4 is modified to the 3/8-rule RK4
 ;   May  1,2021 J. Chen, adapted to gfortran compiler
 ;   Jun  1,2021 J. Chen, forcibly convert the input Bx, By, Bz to float arrays in IDL (Real(4) in Fortran)
 ;   Jun 10,2021 J. Chen, provide a keyword of maxsteps for the case that has extremely long field lines
@@ -164,7 +161,6 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		(4) zreg[0] can be non-zero for 3D case;
 ;		(5) add a keyword of tmpB;
 ; 		(6) cut_str can be a format of '(i0)', '(f0.1)' or '(f0.2)', according to the value of input
-;   Apr 29,2022 J. Chen, extract subroutine round_weigh() for interpolation
 ;   May 10,2022 J. Chen, determine qx, qy, qz, z0flag, cflag, vflag in qfactor.x
 ;   May 19,2022 J. Chen, check the existence of nulls on grids; add a keyword of RAMtmp
 ;   Jun 10,2022 J. Chen, adapted to stretched grids
@@ -173,8 +169,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
-;   Nov 20,2023 J. Chen, change 'reverse' to 'REVERSE', to be compatible with the IDL in some new MacOS; 
-;                        optimalize subroutine check_pseudo_QSL
+;   Jan 28,2024 J. Chen, change the value's meaning in rboundary/rsboundary/reboundary
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -469,7 +464,7 @@ IF z0Flag THEN BEGIN
 	readu, unit, slogq
 	close, unit
   
-  	ss_rb=where(rboundary ne 1)
+  	ss_rb=where(rboundary ne 5)
 	slogq_orig=slogq
 	if(ss_rb[0] ne -1) then slogq_orig[ss_rb]=0.0
 
@@ -566,8 +561,8 @@ IF cFlag THEN BEGIN
 	
 	logq=alog10(qcs>1.)
 	qcs_orig=qcs
-	ss1=where(rsboundary ne 1)
-	ss2=where(reboundary ne 1)
+	ss1=where(rsboundary ne 5)
+	ss2=where(reboundary ne 5)
 	if (ss1[0] ne -1) then qcs_orig[ss1]=!values.F_NAN
 	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
 	
