@@ -565,8 +565,8 @@ integer:: k, rb, rb_index
 logical:: boundary_mark(1:6)
 !----------------------------------------------------------------------------
 forall(k=0:2)
-	boundary_mark(1+2*k)=vp(k)<pmin(k)
-	boundary_mark(2+2*k)=vp(k)>pmax(k)
+	boundary_mark(5-2*k)=vp(k)<pmin(k)
+	boundary_mark(6-2*k)=vp(k)>pmax(k)
 endforall
 
 select case(count(boundary_mark))
@@ -580,8 +580,8 @@ select case(count(boundary_mark))
 			endif
 		enddo
 		! Findloc is introducted from Fortran 2008 and later
-	    ! rb=Findloc(boundary_mark, .true., 1)
-		rb_index=(rb-1)/2
+		! rb=Findloc(boundary_mark, .true., 1)
+		rb_index=(6-rb)/2
 	case default
 		rb=7
 end select
@@ -722,9 +722,9 @@ do sign_dt=-1,1,2
 		call interpolateB(vp0, bp)		
 		if (bp(2)*sign_dt .le. 0) then
 			if (sign_dt .eq. -1) then
-				rs=vp0; rbs=5
+				rs=vp0; rbs=1
 			else
-				re=vp0; rbe=5
+				re=vp0; rbe=1
 			endif		
 			cycle
 		endif
