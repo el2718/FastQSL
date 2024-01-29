@@ -111,12 +111,12 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   rboundary/rsboundary/reboundary: (r:remote, s:start point, e:end point)
 ;             nature of the ends of field lines, see 'subroutine vp_rboundary' in trace_bline.f90
 ;             0 - inside
-;             1 - end at xmin
-;             2 - end at xmax
+;             1 - end at zmin
+;             2 - end at zmax
 ;             3 - end at ymin
 ;             4 - end at ymax
-;             5 - end at zmin
-;             6 - end at zmax
+;             5 - end at xmin
+;             6 - end at xmax
 ;             7 - others
 ;   rboundary3d=rsboundary3d+8*reboundary3d, for saving storage
 ;
@@ -169,7 +169,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
-;   Jan 28,2024 J. Chen, change the value's meaning in rboundary/rsboundary/reboundary
+;   Jan 29,2024 J. Chen, polish some parts
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -464,7 +464,7 @@ IF z0Flag THEN BEGIN
 	readu, unit, slogq
 	close, unit
   
-  	ss_rb=where(rboundary ne 5)
+  	ss_rb=where(rboundary ne 1)
 	slogq_orig=slogq
 	if(ss_rb[0] ne -1) then slogq_orig[ss_rb]=0.0
 
@@ -561,8 +561,8 @@ IF cFlag THEN BEGIN
 	
 	logq=alog10(qcs>1.)
 	qcs_orig=qcs
-	ss1=where(rsboundary ne 5)
-	ss2=where(reboundary ne 5)
+	ss1=where(rsboundary ne 1)
+	ss2=where(reboundary ne 1)
 	if (ss1[0] ne -1) then qcs_orig[ss1]=!values.F_NAN
 	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
 	
