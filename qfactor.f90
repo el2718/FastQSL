@@ -36,7 +36,7 @@ if(bzp>0.0) then
 	reF(:, i, j)=re
 	if ( (rbe .ne. 0) .and.(rbe .ne. 7)) then 
 		call interpolateB(re, bp)
-		e_index=(rbe-1)/2
+		e_index=(6-rbe)/2
 		bnr(i, j)=abs(DBLE(bzp)/bp(e_index))
 	endif
 	
@@ -51,7 +51,7 @@ else !bzp < 0.0
 	reF(:, i, j)=rs
 	if ( (rbs .ne. 0) .and.(rbs .ne. 7)) then 	
 		call interpolateB(rs, bp)
-		s_index=(rbs-1)/2
+		s_index=(6-rbs)/2
 		bnr(i, j)=abs(DBLE(bzp)/bp(s_index))
 	endif
 endif
@@ -74,7 +74,7 @@ rb=reboundary(i,j)
 q(i,j)=NaN
 if ((rb .eq. 0) .or. (rb .eq. 7) .or. (bnr(i,j) .eq. 0.0)) return
 
-index0=(rb-1)/2; index1=mod(index0+1,3); index2=mod(index0+2,3)
+index0=(6-rb)/2; index1=mod(index0+1,3); index2=mod(index0+2,3)
 
 margin_flag1= (i .eq. 0) .or. (i .eq. q1m1) 
 margin_flag2= (j .eq. 0) .or. (j .eq. q2m1)
@@ -206,8 +206,8 @@ else
 	endif
 endif
 
-e_index0=(rbe-1)/2
-s_index0=(rbs-1)/2
+e_index0=(6-rbe)/2
+s_index0=(6-rbs)/2
 call interpolateB(re, bp)
 bn_e=bp(e_index0)
 call interpolateB(rs, bp)
@@ -237,8 +237,8 @@ vpb1(0:2), rsb1(0:2), reb1(0:2), vpb2(0:2), rsb2(0:2), reb2(0:2)
 !----------------------------------------------------------------------------
 rbs=rsboundary(i,j)
 rbe=reboundary(i,j)
-s_index0=(rbs-1)/2; s_index1=mod(s_index0+1,3); s_index2=mod(s_index0+2,3)
-e_index0=(rbe-1)/2; e_index1=mod(e_index0+1,3); e_index2=mod(e_index0+2,3)
+s_index0=(6-rbs)/2; s_index1=mod(s_index0+1,3); s_index2=mod(s_index0+2,3)
+e_index0=(6-rbe)/2; e_index1=mod(e_index0+1,3); e_index2=mod(e_index0+2,3)
 
 q(i,j)=NaN
 if((rbs .eq. 0) .or. (rbe .eq. 0) .or. (rbs .eq. 7) .or. (rbe .eq. 7)) return
