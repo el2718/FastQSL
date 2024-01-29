@@ -581,6 +581,7 @@ select case(count(boundary_mark))
 		enddo
 		! Findloc is introducted from Fortran 2008 and later
 		! rb=Findloc(boundary_mark, .true., 1)
+		
 		rb_index=(6-rb)/2
 	case default
 		rb=7
