@@ -435,9 +435,9 @@ do sign_dt=-1, 1, 2
 	if (z0flag) then
 		if ( b0(2)*sign_dt .le. 0) then 
 			if (sign_dt .eq. -1) then
-				vector9_s=vector9; rbs=5
+				vector9_s=vector9; rbs=1
 			else
-				vector9_e=vector9; rbe=5
+				vector9_e=vector9; rbe=1
 			endif		
 			cycle
 		endif
@@ -507,14 +507,14 @@ endif
 !----------------------------------------------------------------------------
 rs=vector9_s(0:2)
 call interpolateB(rs, bs)
-s_index=(rbs-1)/2
+s_index=(6-rbs)/2
 Bn_s=bs(s_index)
 us=vector9_s(3:5)
 vs=vector9_s(6:8)
 
 re=vector9_e(0:2)
 call interpolateB(re, be)
-e_index=(rbe-1)/2
+e_index=(6-rbe)/2
 Bn_e=be(e_index)
 ue=vector9_e(3:5)
 ve=vector9_e(6:8)
