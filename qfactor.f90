@@ -1,5 +1,5 @@
 !    ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
-! gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
+! gfortran -o qfactor.x qfactor.f90 -fopenmp -O3 -march=native
 ! -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency
 
 include 'trace_bline.f90'
