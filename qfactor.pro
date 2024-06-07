@@ -18,7 +18,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ; COMPILATION 
 ;   For Linux and MacOS (either by ifort or gfortran): 
 ;      ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
-;   gfortran -o qfactor.x qfactor.f90 -fopenmp -Ofast -march=native
+;   gfortran -o qfactor.x qfactor.f90 -fopenmp -O3 -march=native
 ;
 ;   please specify the path of qfactor.x at the line of "spawn, 'qfactor.x' " in qfactor.pro, 
 ;   or move qfactor.x to the $PATH (e.g. /usr/local/bin/) of the system
@@ -27,8 +27,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;      ifort /o qfactor.exe qfactor.f90 /Qopenmp /O3 /QxHost /Qipo
 ;   please replace qfactor.x by qfactor.exe for the path specifing
 ;
-;   -O3, -xHost, -ipo, -Ofast, -march=native are for a better efficiency;
-;   -Ofast would be problematic for some compilers, then please substitutue -O3 for it; 
+;   -O3, -xHost, -ipo, -march=native are for a better efficiency;
 ;
 ; INPUTS
 ;   Bx, By, Bz: 3D magnetic field, will be forcibly converted to float arrays while writing 'b3d.bin'
