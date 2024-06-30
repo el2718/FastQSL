@@ -246,7 +246,7 @@ if ~keyword_set(tol)        then tol=10.0^(-4.)
 if ~keyword_set(step)       then step=1.
 if ~keyword_set(min_step)   then min_step=1/4.
 min_step=min([min_step,step])
-if ~keyword_set(maxsteps)   then maxsteps=long(4*(nx+ny+nz)/step)
+if ~keyword_set(maxsteps)   then maxsteps=long(4*(nx+ny+nz)/min_step)
 ;----------------------------------------------------------------------------------------------
 ; the directory for output
 cd, current = cdir
