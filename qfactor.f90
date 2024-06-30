@@ -12,6 +12,8 @@ real:: bzp, bp(0:2), vp(0:2), rs(0:2), re(0:2), twist0, length0, q0, q_perp0, in
 integer:: i, j, rbs, rbe, s_index, e_index
 !----------------------------------------------------------------------------
 call ij2vp(i, j, vp)
+call interpolateB(vp, bp)
+bzp=bp(2)
 
 if (scottFlag) then 
 	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, twistFlag)
@@ -24,9 +26,6 @@ endif
 
 length(i, j)=length0
 if (twistFlag) twist(i, j)=twist0
-
-call interpolateB(vp, bp)
-bzp=bp(2)
 
 if(bzp>0.0) then 
 	sign2d(i,j)=1.0
