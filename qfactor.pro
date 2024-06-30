@@ -1,7 +1,7 @@
-PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag,     $
-             factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, maxsteps=maxsteps, $
-             scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out, odir=odir, fstr=fstr, $
-             nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
+PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag,      $ 
+             factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, min_step=min_step, tol=tol,  $
+             maxsteps=maxsteps, scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out,     $
+             odir=odir, fstr=fstr, nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
 ;+
 ; PURPOSE:
 ;   Calculate the squashing factor Q at the photosphere or a cross section or a box volume, 
@@ -67,6 +67,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   RK4Flag:    to trace bline by RK4; default is 0B (RKF45)
 ;   			   
 ;   step:       step size in tracing field lines for RK4; default=1.0
+;
+;   min_step:   minimum step size in tracing field lines; default=1/4.
 ;
 ;   tol:        tolerance of a step in RKF45; default is 10.^(-4)
 ;
@@ -168,7 +170,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
-;   Jan 29,2024 J. Chen, polish some parts
+;   Jun 30,2024 J. Chen, add a keyword of min_step
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -242,6 +244,8 @@ if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
 if ~keyword_set(tol)        then tol=10.0^(-4.)
 if ~keyword_set(step)       then step=1.
+if ~keyword_set(min_step)   then min_step=1/4.
+min_step=min([min_step,step])
 if ~keyword_set(maxsteps)   then maxsteps=long(4*(nx+ny+nz)/step)
 ;----------------------------------------------------------------------------------------------
 ; the directory for output
@@ -273,7 +277,7 @@ get_lun,unit
 
 openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
-printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
+printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(min_step), float(tol)
 printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), curlB_out_int
 close,  unit
 
