@@ -878,7 +878,7 @@ logical:: xa_exist, ya_exist, za_exist, ifort_flag, curlB_out
 !----------------------------------------------------------------------------
 open(unit=8, file='head.txt', status='old')
 read(8, *) nx, ny, nz, nbridges, delta, maxsteps, &
-           xreg, yreg, zreg, step, min_step, tol, &
+           xreg, yreg, zreg, step, tol, &
            twistFlag_int, RK4flag_int, scottFlag_int, csFlag_int, curlB_out_int
  close(8)
  
@@ -1035,9 +1035,15 @@ open(unit=8, file='tail.txt', status='replace')
 write(8, *) qx, qy, qz, q1, q2
 write(8, *) q0flag_int, cflag_int, vflag_int
  close(8)
- !----------------------------------------------------------------------------
+!----------------------------------------------------------------------------
  !maxsteps    =nint(4*(nx+ny+nz)/step)*10
 min_incline  =0.05
+if (stretchFlag) then
+	min_step=minval([step,delta/maxval([dxa,dya,dza])])
+else
+	min_step=minval([step,delta])
+endif
+
 min_step_foot=min_step/2.0
 if (RK4flag) then
 	maxsteps_foot=    step/min_step_foot*4
