@@ -331,7 +331,7 @@ if (rb .ne. 7) then
 		ds1= vp1(rb_index)-pmin(rb_index)
 	else
 		ds0=pmax(rb_index)- vp0(rb_index)
-		ds1= vp1(rb_index)-pmin(rb_index)
+		ds1= vp1(rb_index)-pmax(rb_index)
 	endif
 	
 	if  (RK4flag) then
