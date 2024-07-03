@@ -319,8 +319,6 @@ if (any((vp .eq. pmin) .or. (vp .eq. pmax))) then
 	return
 endif
 
-call vp_rboundary(vp1, rb, rb_index)
-if (rb .eq. 0) return
 vector9_orig  =vector9
 vector9_1_orig=vector9_1
 vector9_0=vector9
