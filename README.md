@@ -19,7 +19,7 @@ A GPU version is also provided https://github.com/peijin94/FastQSL.
 -----------------------------
 ## Dependencies
 ### For *.pro
-* IDL https://www.l3harrisgeospatial.com/Software-Technology/IDL or
+* IDL https://www.nv5geospatialsoftware.com/Products/IDL or
 * GDL https://gnudatalanguage.github.io
   * note: setting an environmental variable of GDL_PATH is necessary for write_png. 
 If you used one of the binary packages available for Linux then it depends on the distribution:  
