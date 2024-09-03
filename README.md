@@ -22,12 +22,12 @@ A GPU version is also provided https://github.com/peijin94/FastQSL.
 * IDL https://www.nv5geospatialsoftware.com/Products/IDL or
 * GDL https://gnudatalanguage.github.io
   * note: setting an environmental variable of GDL_PATH is necessary for write_png. 
-If you used one of the binary packages available for Linux then it depends on the distribution:  
+If you used one of the binary packages available for Linux, then it depends on the distribution:  
 -Ubuntu & Fedora:  /usr/share/gnudatalanguage/lib   
 -ArchLinux: /usr/lib/gdl  
 -Gentoo: /usr/local/share/gdl  
 -MacOS: /opt/local/share/gnudatalanguage/lib  
-**Please append such line to ~/.bashrc** (for Ubuntu)    
+**Please append such line to ~/.bashrc** (e.g. for Ubuntu)    
 export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
 ### For *.f90
