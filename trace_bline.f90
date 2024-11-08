@@ -201,15 +201,17 @@ implicit none
 real:: w(0:1,0:2), weight(0:1,0:1,0:1), vp(0:2)
 integer:: round(0:1,0:2), i, j, k
 !----------------------------------------------------------------------------
-round(0,:)=floor(vp)
-w(1,:)=vp-round(0,:)
-
 do i=0,2
-	if ( .not. (vp(i) .ge. 0.0)) then 
-	! this way can avoid the crash of vp(i) .eq. NaN (caused by B=0), compared with vp(i) .lt. 0.0
-		w(1,i)=0.0; round(0,i)=0  		
+	if ( .not. (vp(i) .gt. 0.0)) then
+! compared with vp(i) .le. 0.0, this way can avoid the crash from vp(i) .eq. NaN (by B=0)
+		round(0,i)=0
+		w(1,i)=0.0
 	else if (vp(i) .ge. pmax(i)) then
-		w(1,i)=1.0; round(0,i)=r0max(i)
+		round(0,i)=r0max(i)
+		w(1,i)=1.0
+	else
+		round(0,i)=floor(vp(i))
+		w(1,i)=vp(i)-round(0,i)
 	endif
 enddo
  
