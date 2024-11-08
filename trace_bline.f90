@@ -13,10 +13,10 @@ end module qfactor_common
 
 module trace_common
 implicit none
-	integer:: nx, ny, nz, nxm1, nym1, nzm1, nxm2, nym2, nzm2, maxsteps, maxsteps_foot, &
+	integer:: nx, ny, nz, nxm1, nym1, nzm1, nxm2, nym2, nzm2, maxsteps, maxsteps_foot, r0max(0:2), &
 	binary_index_xs, binary_index_ys, binary_index_zs, index_try_xs, index_try_ys, index_try_zs
 	integer(2), allocatable:: binary_values(:)
-	real:: xmax, ymax, zmax, xmin, ymin, zmin, pmin(0:2), pmax(0:2), r0max(0:2), &
+	real:: xmax, ymax, zmax, xmin, ymin, zmin, pmin(0:2), pmax(0:2), &
 	step, min_step, min_step_foot, tol, min_incline, NaN, dxa_uni, dya_uni, dza_uni
 	real(8), parameter:: pi=3.141592653589793D0
 	logical:: RK4flag, grad3DFlag, stretchFlag, uni_stretch_Flag
@@ -956,10 +956,9 @@ else
 	curlB_grid          =>curlB_grid0
 	grad_unit_vec_B_grid=>grad_unit_vec_B_grid0
 endif
-
+r0max=[nxm2, nym2, nzm2]
 pmin=[xmin,ymin,zmin]
 pmax=[xmax,ymax,zmax]
-if (.not. stretchFlag) r0max=pmax-1.0
 !----------------------------------------------------------------------------
 if (stretchFlag) then
 	delta_mag=minval([dxa,dya])
