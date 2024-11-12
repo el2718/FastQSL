@@ -187,14 +187,12 @@ if sbx[1] ne sby[1] or sbx[1] ne sbz[1] or $
 nx=sbz[1] & ny=sbz[2] & nz=sbz[3]
 
 ; check the existence of nulls on grids, to avoid "segmentation fault occurred"
-ss=where((bx eq 0.0) and (by eq 0.0) and (bz eq 0.0))
-n_ss=n_elements(ss)
-if (n_ss gt 3) then message, string(n_ss)+" nulls (B=0) on grids! Too many!"
+dummy=where((bx eq 0.0) and (by eq 0.0) and (bz eq 0.0), count)
+if (count gt 3) then message, string(count)+" nulls (B=0) on grids! Too many!"
 
 ; check the existence of infinite or NaN values on grids, to avoid "segmentation fault occurred"
-ss=where(~finite(bx) or ~finite(by) or ~finite(bz))
-if (ss[0] ne -1) then message, "there are some infinite or NaN vaules on grids"
-
+dummy=where(~finite(bx) or ~finite(by) or ~finite(bz), count)
+if (count gt 0) then message, "there are some infinite or NaN vaules on grids!"
 
 stretchFlag=keyword_set(xa) and keyword_set(ya) and keyword_set(za)
 
