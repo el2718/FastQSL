@@ -642,8 +642,9 @@ IF vflag THEN BEGIN
 		readu, unit, twist3d
 		close, unit
 	endif
-	
-	if (zreg[0] eq 0.0) and preview then begin
+
+ 	if stretchFlag then zmin=za(0) else zmin=0.
+	if (zreg[0] eq zmin) and preview then begin
 		slogq=fltarr(q1,q2)	
 		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
