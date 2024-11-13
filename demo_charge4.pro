@@ -84,11 +84,11 @@ qfactor, Bx, By, Bz, xa=xa, ya=ya, za=za, delta=B_delta/3, $
 xreg=[-2,0], yreg=[1,0], zreg=[0,2], /csflag, $
 fstr='tilted_cs', /rk4, step=2.0, odir= 'qfactor/', /twist, nbridges=4
 
-;An example of calculating in a box volume, and exporting the curlB
+;An example of calculating in a box volume
 qfactor, Bx, By, Bz, xreg=[scale/4,scale/2], yreg=[scale/9,scale/3], zreg=[top/4,top/2], $
 delta=0.8, tol=1.0e-3, odir= 'qfactor'
 
-; exporting the curlB
+; exporting curlB
 qfactor, Bx, By, Bz, odir= 'qfactor', /curlB_out
 
 end
