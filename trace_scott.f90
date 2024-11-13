@@ -479,6 +479,15 @@ do sign_dt=-1, 1, 2
 	
 	call correct_foot_scott(vector9_0, vector9_1, sign_dt, rb)
 	
+	if (rb .eq. 0 .or. rb .eq. 7) then 
+		if (sign_dt .eq. -1) then
+			vector9_s=vector9_1; rbs=rb
+		else
+			vector9_e=vector9_1; rbe=rb
+		endif
+		return
+	endif
+
 	dL=norm2(vector9_1(0:2)-vector9_0(0:2))
 	length0=length0+dL
 	
