@@ -347,13 +347,13 @@ endif else begin
 
 	preset_fstr=0B
 	
-	if abs(delta - round(delta)) lt 0.0001 then begin 
+	if abs(delta - round(delta)) lt 0.0005 then begin 
 		delta_str='delta'+string(delta,'(i0)')
 	endif else begin
-		if abs(delta*10 - round(delta*10)) lt 0.0001 then begin
+		if abs(delta*10 - round(delta*10)) lt 0.005 then begin
 			delta_str='delta'+string(delta,'(f0.1)') 
 		endif else begin
-			if abs(delta*100 - round(delta*100)) lt 0.0001 then $			
+			if abs(delta*100 - round(delta*100)) lt 0.05 then $			
 				delta_str='delta'+string(delta,'(f0.2)') $
 			else	delta_str='delta'+string(delta,'(f0.3)')
 		endelse
@@ -379,10 +379,10 @@ endif else begin
 		if zFlag then cut_coordinate=zreg[0]
 
 		if (xFlag or yFlag or zFlag) then begin
-			if abs(cut_coordinate - round(cut_coordinate)) lt 0.0001 then begin 
+			if abs(cut_coordinate - round(cut_coordinate)) lt 0.005 then begin 
 				cut_str=cut_str0+string(cut_coordinate,'(i0)')
 			endif else begin
-				if abs(cut_coordinate*10 - round(cut_coordinate*10)) lt 0.0001 then $
+				if abs(cut_coordinate*10 - round(cut_coordinate*10)) lt 0.05 then $
 					cut_str=cut_str0+string(cut_coordinate,'(f0.1)') $
 				else 	cut_str=cut_str0+string(cut_coordinate,'(f0.2)')
 			endelse
