@@ -1087,7 +1087,7 @@ else
 	maxsteps_foot=min_step/min_step_foot*4
 endif
 !----------------------------------------------------------------------------
-grad3DFlag= scottFlag .or. vflag
+grad3DFlag= scottFlag .or. vflag .or. stretchflag
 if (grad3DFlag) then
 	allocate(grad_unit_vec_Bfield(0:2, 0:2, 0:nxm1, 0:nym1, 0:nzm1))
 	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
