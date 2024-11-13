@@ -485,6 +485,7 @@ do sign_dt=-1, 1, 2
 		else
 			vector9_e=vector9_1; rbe=rb
 		endif
+		q0=NaN; q_perp0=NaN
 		return
 	endif
 
@@ -506,11 +507,6 @@ do sign_dt=-1, 1, 2
 enddo
 
 if (twistflag) twist0=twist0/(4.0*pi)
-
-if ((rbs .eq. 0) .or. (rbe .eq. 0) .or. (rbs .eq. 7) .or. (rbe .eq. 7)) then 
-	q0=NaN; q_perp0=NaN
-	return 
-endif
 !----------------------------------------------------------------------------
 rs=vector9_s(0:2)
 call interpolateB(rs, bs)
