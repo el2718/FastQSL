@@ -187,12 +187,14 @@ if sbx[1] ne sby[1] or sbx[1] ne sbz[1] or $
 nx=sbz[1] & ny=sbz[2] & nz=sbz[3]
 
 ; check the existence of nulls on grids, to avoid "segmentation fault occurred"
-dummy=where((bx eq 0.0) and (by eq 0.0) and (bz eq 0.0), count)
-if (count gt 3) then message, string(count)+" nulls (B=0) on grids! Too many!"
+ss=where((bx eq 0.0) and (by eq 0.0) and (bz eq 0.0))
+n_ss=n_elements(ss)
+if (n_ss gt 3) then message, string(n_ss)+" nulls (B=0) on grids! Too many!"
 
 ; check the existence of infinite or NaN values on grids, to avoid "segmentation fault occurred"
-dummy=where(~finite(bx) or ~finite(by) or ~finite(bz), count)
-if (count gt 0) then message, "there are some infinite or NaN vaules on grids!"
+ss=where(~finite(bx) or ~finite(by) or ~finite(bz))
+if (ss[0] ne -1) then message, "there are some infinite or NaN vaules on grids"
+
 
 stretchFlag=keyword_set(xa) and keyword_set(ya) and keyword_set(za)
 
@@ -258,7 +260,10 @@ if ~file_test(odir) then file_mkdir, odir
 ; check the existence of curlB.sav
 file_curlB=odir+'curlB.sav'
 curlB_exist=file_test(file_curlB)
-if curlB_out and (not curlB_exist) then curlB_out_int=1L else curlB_out_int=0L
+if curlB_out and curlB_exist then begin
+	print, "'"+file_curlB+"' already exists"
+	return
+endif
 ;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
 if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
@@ -272,7 +277,7 @@ get_lun,unit
 openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
 printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
-printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), curlB_out_int
+printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), long(curlB_out)
 close,  unit
 
 openw,  unit, tmp_dir+'b3d.bin'
@@ -313,6 +318,22 @@ endelse
 print, time_elapsed+' elapsed for calculation' 
 
 ; ################################### retrieving results ###################################################### 
+; save curlB
+if curlB_out then begin
+	curlB=fltarr(3, nx, ny, nz)
+	openr, unit, tmp_dir+'curlB.bin'
+	readu, unit, curlB
+	close, unit
+		
+	curlBx=reform(curlB[0,*,*,*])
+	curlBy=reform(curlB[1,*,*,*])
+	curlBz=reform(curlB[2,*,*,*])
+	
+	save, filename=file_curlB, curlBx, curlBy, curlBz
+	print, "curlB is saved in '"+file_curlB+"'"
+	return
+endif
+;----------------------------------------------------------------------------------------------
 qx=0L & qy=0L & qz=0L & q1=0L & q2=0L
 z0Flag=0 & vFlag=0 & cFlag=0
 openr,  unit, tmp_dir+'tail.txt'
@@ -373,26 +394,6 @@ endif else begin
 endelse
 
 file_sav=odir+fstr+'.sav'
-;----------------------------------------------------------------------------------------------
-; save curlB
-if curlB_out and curlB_exist then print, "'"+file_curlB+"' already exists"
-if curlB_out_int then begin
-	curlB=fltarr(3, nx, ny, nz)
-	openr, unit, tmp_dir+'curlB.bin'
-	readu, unit, curlB
-	close, unit
-		
-	curlBx=reform(curlB[0,*,*,*])
-	curlBy=reform(curlB[1,*,*,*])
-	curlBz=reform(curlB[2,*,*,*])
-	
-	save, filename=file_curlB, curlBx, curlBy, curlBz
-		
-	; release the memory of curlB	
-	dummy=(temporary(curlB))[0]+(temporary(curlBx))[0]+(temporary(curlBy))[0]+(temporary(curlBz))[0]
-	
-	print, "curlB is saved in '"+file_curlB+"'"
-endif
 ;----------------------------------------------------------------------------------------------
 ; mark the area for calculation on the magnetogram
 if preview then begin
@@ -641,9 +642,8 @@ IF vflag THEN BEGIN
 		readu, unit, twist3d
 		close, unit
 	endif
-
-	if stretchFlag then zmin=za(0) else zmin=0.
-	if (zreg[0] eq zmin) and preview then begin
+	
+	if (zreg[0] eq 0.0) and preview then begin
 		slogq=fltarr(q1,q2)	
 		openr, unit, tmp_dir+'slogq.bin'
 		readu, unit, slogq
