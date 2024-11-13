@@ -765,6 +765,15 @@ do sign_dt=-1,1,2
 	
 	call correct_foot(vp_tmp, vp1, sign_dt, rb)
 	
+	if (rb .eq. 0 .or. rb .eq. 7) then 
+		if (sign_dt .eq. -1) then
+			rs=vp1; rbs=rb
+		else
+			re=vp1; rbe=rb
+		endif
+		return
+	endif
+
 	dL=norm2(vp1-vp_tmp)
 	
 	length0=length0+dL
@@ -962,6 +971,32 @@ r0max=[nxm2, nym2, nzm2]
 pmin=[xmin,ymin,zmin]
 pmax=[xmax,ymax,zmax]
 !----------------------------------------------------------------------------
+if (twistFlag .or. curlB_out) then
+	allocate(curlB(0:2, 0:nxm1, 0:nym1, 0:nzm1))
+
+	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
+	do k=0, nzm1
+	do j=0, nym1
+	do i=0, nxm1
+		call curlB_grid(i, j, k, curlB(:,i,j,k))
+	enddo
+	enddo
+	enddo
+	!$OMP END PARALLEL DO
+	
+	if (curlB_out) then
+		open(unit=8, file='curlB.bin', access='stream', status='replace')
+		write(8) curlB
+		close(8)
+		deallocate(curlB, Bfield)
+		if (stretchFlag) then
+			deallocate(xa, ya, za, dxa, dya, dza)
+			if (.not. uni_stretch_Flag) deallocate(binary_values)
+		endif
+		call exit
+	endif
+endif
+!----------------------------------------------------------------------------
 if (stretchFlag) then
 	delta_mag=minval([dxa,dya])
 
@@ -1050,27 +1085,6 @@ if (RK4flag) then
 	maxsteps_foot=    step/min_step_foot*4
 else
 	maxsteps_foot=min_step/min_step_foot*4
-endif
-!----------------------------------------------------------------------------
-if (twistFlag .or. curlB_out) then
-	allocate(curlB(0:2, 0:nxm1, 0:nym1, 0:nzm1))
-
-	!$OMP PARALLEL DO  PRIVATE(i, j, k), schedule(DYNAMIC) 
-	do k=0, nzm1
-	do j=0, nym1
-	do i=0, nxm1
-		call curlB_grid(i, j, k, curlB(:,i,j,k))
-	enddo
-	enddo
-	enddo
-	!$OMP END PARALLEL DO
-	
-	if (curlB_out) then
-		open(unit=8, file='curlB.bin', access='stream', status='replace')
-		write(8) curlB
-		close(8)
-		if (.not. twistFlag) deallocate(curlB)
-	endif
 endif
 !----------------------------------------------------------------------------
 grad3DFlag= scottFlag .or. vflag
