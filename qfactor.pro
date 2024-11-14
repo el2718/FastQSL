@@ -171,7 +171,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
 ;   Jan 29,2024 J. Chen, polish some parts
-;   Nov 15, 2024 Jun Chen, add a keyword of compress
+;   Nov 15,2024 J. Chen, add a keyword of compress
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
