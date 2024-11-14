@@ -431,7 +431,7 @@ do sign_dt=-1, 1, 2
 	vector9(6:8)=v0
 	
 	if (z0flag) then
-		if ( b0(2)*sign_dt .lt. 0.) then 
+		if ( b0(2)*sign_dt .le. 0.) then 
 			if (sign_dt .eq. -1) then
 				vector9_s=vector9; rbs=1
 			else
