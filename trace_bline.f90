@@ -723,7 +723,7 @@ do sign_dt=-1,1,2
 
 	if (z0flag) then		
 		call interpolateB(vp0, bp)		
-		if (bp(2)*sign_dt .lt. 0.) then
+		if (bp(2)*sign_dt .le. 0.) then
 			if (sign_dt .eq. -1) then
 				rs=vp0; rbs=1
 			else
