@@ -1,7 +1,7 @@
 PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag,     $
              factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, maxsteps=maxsteps, $
              scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out, odir=odir, fstr=fstr, $
-             nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp
+             nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp, compress=compress
 ;+
 ; PURPOSE:
 ;   Calculate the squashing factor Q at the photosphere or a cross section or a box volume, 
@@ -92,6 +92,8 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;
 ;   tmpB:       apply temporary() to Bx, By, Bz to reduce the memory occupation of 3D magnetic field in IDL after writing b3d.bin to tmp_dir; default is 0B
 ;
+;   compress:    to invoke the keyword compress of save, for saving disk storage; default is 0B
+;
 ;  memory occupation in qfactor.x: 
 ;       3D magnetic field + some 2D arrays + 3D curlB field (same as the occupation of the 3D magnetic field, when twistFlag=1B) +
 ;       grad_unit_vec_Bfield (3 times as the occupation of the 3D magnetic field)
@@ -169,6 +171,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
 ;   Jan 29,2024 J. Chen, polish some parts
+;   Nov 15, 2024 Jun Chen, add a keyword of compress
 ;
 ;   This software is provided without any warranty. Permission to use,
 ;   copy, modify. Distributing modified or unmodified copies is granted
@@ -328,7 +331,7 @@ if curlB_out then begin
 	curlBy=reform(curlB[1,*,*,*])
 	curlBz=reform(curlB[2,*,*,*])
 	
-	save, filename=file_curlB, curlBx, curlBy, curlBz
+	save, filename=file_curlB, curlBx, curlBy, curlBz, compress=compress
 	print, "curlB is saved in '"+file_curlB+"'"
 	return
 endif
@@ -523,13 +526,13 @@ IF z0Flag THEN BEGIN
 
 ; save results 
 	if scottFlag then begin
-	 	if twistFlag then save, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, $
+	 	if twistFlag then save, compress=compress, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, $
 	 	                  rF, q_perp, slogq_perp, slogq_perp_orig, twist $ 
-		             else save, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, $
+		             else save, compress=compress, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, $
 		                  rF, q_perp, slogq_perp, slogq_perp_orig
 	endif else begin
-		if twistFlag then save, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, rF, twist $ 
-		             else save, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, rF
+		if twistFlag then save, compress=compress, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, rF, twist $ 
+		             else save, compress=compress, filename=file_sav, slogq, slogq_orig, q, length, Bnr, rboundary, xreg, yreg, zreg, delta, rF
 	endelse
 ENDIF 
 
@@ -596,11 +599,11 @@ IF cFlag THEN BEGIN
 
 ; save results 
 	if scottFlag then begin
-		if twistFlag then save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig, twist $
-		             else save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig	
+		if twistFlag then save, compress=compress, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig, twist $
+		             else save, compress=compress, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, q_perp, q_perp_orig	
 	endif else begin
-		if twistFlag then save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, twist $
-		             else save, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF
+		if twistFlag then save, compress=compress, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF, twist $
+		             else save, compress=compress, filename=file_sav, qcs, qcs_orig, length, rsboundary, reboundary, xreg, yreg, zreg, delta, csFlag, rsF, reF
 	endelse
 	
 ENDIF
@@ -648,11 +651,11 @@ IF vflag THEN BEGIN
 		
 ; save results 
 	if scottFlag then begin
-		if twistFlag then save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d, twist3d $
-		             else save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d
+		if twistFlag then save, compress=compress, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d, twist3d $
+		             else save, compress=compress, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, q_perp3d
 	endif else begin
-		if twistFlag then save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, twist3d $
-		             else save, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta	
+		if twistFlag then save, compress=compress, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta, twist3d $
+		             else save, compress=compress, filename=file_sav, q3d, rboundary3d, xreg, yreg, zreg, delta	
 	endelse
 ENDIF 
 
