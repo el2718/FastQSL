@@ -347,14 +347,10 @@ endif else begin
 
 	preset_fstr=0B
 	
-	if sphericalflag then begin
-		delta_str=''
-	endif else begin
-		decimal3=round(1000*(delta-floor(delta)))
-		for i=1, 4 do if (decimal3 mod 10^i) ne 0 then break
-		if (i ge 4) then delta_str='delta'+string(round(delta),'(i0)') $
-		            else delta_str='delta'+string(delta,'(f0.'+string(4-i)+')')
-	endelse
+	decimal3=round(1000*(delta-floor(delta)))
+	for i=1, 4 do if (decimal3 mod 10^i) ne 0 then break
+	if (i ge 4) then delta_str='delta'+string(round(delta),'(i0)') $
+	            else delta_str='delta'+string(delta,'(f0.'+string(4-i)+')')
 	
 	cut_str=''
 	
