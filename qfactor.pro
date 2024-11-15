@@ -354,7 +354,7 @@ endif else begin
 	if cflag  then head_str='qcs'
 	if vflag  then head_str='q3d'
  
-	if vflag or csFlag then begin	
+	if z0flag or vflag or csFlag then begin	
   		cut_str=''
 	endif else begin
 		 
