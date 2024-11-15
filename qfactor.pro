@@ -354,11 +354,6 @@ endif else begin
 	if cflag  then head_str='qcs'
 	if vflag  then head_str='q3d'
  
-	decimal3=round(1000*(delta-floor(delta)))
-	for i=1, 4 do if (decimal3 mod 10^i) ne 0 then break
-	if (i ge 4) then delta_str='_delta'+string(round(delta),'(i0)') $
-	            else delta_str='_delta'+string(delta,'(f0.'+string(4-i)+')')
-	
 	if vflag or csFlag then begin	
   		cut_str=''
 	endif else begin
@@ -382,8 +377,13 @@ endif else begin
 			            else cut_str=cut_str0+string(cut_coordinate,'(f0.'+string(4-i)+')')
 		endif
 	endelse
-	
-	fstr = head_str + delta_str + cut_str
+ 
+	decimal3=round(1000*(delta-floor(delta)))
+	for i=1, 4 do if (decimal3 mod 10^i) ne 0 then break
+	if (i ge 4) then delta_str='_delta'+string(round(delta),'(i0)') $
+	            else delta_str='_delta'+string(delta,'(f0.'+string(4-i)+')')
+	     
+	fstr = head_str + cut_str + delta_str
 endelse
 
 file_sav=odir+fstr+'.sav'
