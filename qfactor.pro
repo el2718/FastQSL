@@ -349,18 +349,19 @@ if keyword_set(fstr) then begin
 endif else begin 
 
 	preset_fstr=0B
-	
+
+	if z0flag then head_str='qz0'
+	if cflag  then head_str='qcs'
+	if vflag  then head_str='q3d'
+ 
 	decimal3=round(1000*(delta-floor(delta)))
 	for i=1, 4 do if (decimal3 mod 10^i) ne 0 then break
-	if (i ge 4) then delta_str='delta'+string(round(delta),'(i0)') $
-	            else delta_str='delta'+string(delta,'(f0.'+string(4-i)+')')
+	if (i ge 4) then delta_str='_delta'+string(round(delta),'(i0)') $
+	            else delta_str='_delta'+string(delta,'(f0.'+string(4-i)+')')
 	
-	cut_str=''
-	
-	if vflag then begin
-		head_str='q3d_' 		
-	endif else  begin
-		head_str='qcs_'
+	if vflag or csFlag then begin	
+  		cut_str=''
+	endif else begin
 		 
 		xFlag=qx eq 1 ; calculate Q in a cross section parallel to x=0  
 		yFlag=qy eq 1 ; calculate Q in a cross section parallel to y=0
