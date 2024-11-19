@@ -504,13 +504,13 @@ do while ( continue_flag )
 	if (rb .eq. 0) then
 		continue_flag = error .gt. tol_this_1 .and. (abs(dt) .gt. min_step)
 		if (continue_flag) then
-			dt=dt*0.8
+			dt=dt*0.618
 		else
 			if (error .le. tol_this_1) then
-				if (error .le. (tol_this_1)/((100./abs(dt*0.9))**5.) ) then
+				if (error .le. (tol_this_1)/((100./abs(dt*0.618))**5.) ) then
 					dt=sign(100., dt)
 				else
-					dt=dt* ((tol_this_1/error)**0.2)*0.9
+					dt=dt* ((tol_this_1/error)**0.2)*0.618
 				endif
 			endif
 		endif
