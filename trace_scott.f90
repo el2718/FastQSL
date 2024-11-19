@@ -243,61 +243,55 @@ do while ( continue_flag )
 	dvp=ds*(ce1*k1(0:2)+ce3*k3(0:2)+ce4*k4(0:2)+ce5*k5(0:2)+ce6*k6(0:2))
 	error = norm2(dvp)
 	
-	continue_flag =.false.
-	if (abs(dt) .gt. min_step) then
-		vp1=vector9_1(0:2)
-		if (.not.(all(pmin<=vp1 .and. vp1<=pmax) ))  then
-			call vp_rboundary(vp1, rb, rb_index)		
-			if (rb .ne. 7) then 
-						
-				if (abs(ds) .ge. 2.*norm2(vp1-vp0))  then
-					dt=dt/2.
+!----------------------------------------------------------------------------
+	call vp_rboundary(vp1, rb, rb_index)
+	if (rb .eq. 0) then
+		continue_flag = error .gt. tol_this_1 .and. (abs(dt) .gt. min_step)
+		if (continue_flag) then
+			dt=dt*0.8
+		else
+			if (error .le. tol_this_1) then
+				if (error .le. (tol_this_1)/((100./abs(dt*0.9))**5.) ) then
+					dt=sign(100., dt)
 				else
-					if( mod(rb, 2) .eq. 1) then
-					 	ds0=pmin(rb_index)- vp0(rb_index)
-					 	ds1= vp1(rb_index)-pmin(rb_index)
-					else
-					 	ds0=pmax(rb_index)- vp0(rb_index)
-					 	ds1= vp1(rb_index)-pmax(rb_index)
-					endif			
-					dt=dt*ds0/(ds0+ds1)*0.95
+					dt=dt* ((tol_this_1/error)**0.2)*0.9
 				endif
-				
-				if (abs(dt) .lt. min_step) then	
-					dt=sign(min_step, dt)	
-					continue_flag=.false.
-				else
-					continue_flag=.true.
-				endif
-			else
-				dt=dt*0.618
-				if (abs(dt) .lt. min_step) dt=sign(min_step,dt)
-				continue_flag=.true.
 			endif
-			
-			cycle
 		endif
-		
-		if  (error .gt. tol_this_1) then
-			dt=dt*0.618
-			if (abs(dt) .lt. min_step) dt=sign(min_step,dt)
-			continue_flag=.true.
-			cycle
+		if (abs(dt) .lt. min_step) dt=sign(min_step, dt)
+!----------------------------------------------------------------------------
+	else
+		continue_flag =abs(dt) .gt. min_step
+		if (continue_flag) then
+
+			select case (rb)
+			case(1:6)
+				if(mod(rb, 2) .eq. 1) then
+					ds0=pmin(rb_index)- vp0(rb_index)
+					ds1= vp1(rb_index)-pmin(rb_index)
+				else
+					ds0=pmax(rb_index)- vp0(rb_index)
+					ds1= vp1(rb_index)-pmax(rb_index)
+				endif
+				if (abs(ds) .ge. 2.*norm2(vp1-vp0)) then
+					dt=dt*0.5
+				else if (abs(dt*ds0/(ds0+ds1)) .lt. min_step) then
+					continue_flag = .false.
+				else
+					! then if a next do loop exist, continue_flag will be .false. in that loop
+					! because dt will \approx 0.5*sign(min_step, dt) in that loop
+					dt=sign(abs(dt*ds0/(ds0+ds1))-0.5*min_step, dt)
+				endif
+			case(7)
+				dt=dt*0.5
+			end select
+			! once dt is scaled to sign(min_step, dt), only once left to be processed in the do loop
+			if (abs(dt) .lt. min_step) dt=sign(min_step, dt)
 		endif
+!----------------------------------------------------------------------------
 	endif
 	
 enddo
-
-!(0.618)^-5 \approx 11.0932
-min_error=(tol_this_1/11.0932)/((100./abs(dt))**5.)
-if (error .lt. min_error) then
-	if (error .ne. 0.0) dt=sign(100.,dt)
-else
-	scale_dt=((tol_this_1/error)**0.2)*0.618
-	dt=dt*scale_dt
-endif
-
-if (abs(dt) .lt. min_step) dt=sign(min_step,dt)
 
 end subroutine RKF45_scott
 
