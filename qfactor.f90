@@ -225,7 +225,7 @@ integer:: i, j, k, rbs, rbe, maxdim, index1, index2, &
 s_index0, s_index1, s_index2, sign_s_index1, sign_s_index2, &
 e_index0, e_index1, e_index2, sign_e_index1, sign_e_index2, &
 rbsa1, rbea1, rbsa2, rbea2, rbsb1, rbeb1, rbsb2, rbeb2
-logical:: margin_flag1, margin_flag2, bkey, boundary_mark(1:6), &
+logical:: margin_flag1, margin_flag2, tangent_success, bkey, &
 bkeys1, bkeys2, bkeys11, bkeys12, bkeys21, bkeys22, &
 bkeye1, bkeye2, bkeye11, bkeye12, bkeye21, bkeye22
 real:: q0, q_perp0, length0, twist0, delta_cs, &
@@ -265,29 +265,11 @@ bkey=(bkeys1 .or. bkeys11 .or. bkeys12) .and. &
      (bkeye1 .or. bkeye11 .or. bkeye12) .and. &
      (bkeye2 .or. bkeye21 .or. bkeye22)
 !----------------------------------------------------------------------------
-!some problematic sites are filled with trace_scott
-if ((tangent_Flag(i,j) .and. (margin_flag1 .or. margin_flag2)) .or.  &
-	(.not. tangent_Flag(i,j) .and.                                   &
-	 (((i .gt.    0) .and. tangent_Flag(i-1, j)) .or.                &
-	  ((i .lt. q1m1) .and. tangent_Flag(i+1, j)) .or.                &
-	  ((j .gt.    0) .and. tangent_Flag(i, j-1)) .or.                &
-	  ((j .lt. q2m1) .and. tangent_Flag(i, j+1)) .or. .not. bkey))) then
-	call ij2vp(i, j, vp)
-	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
-	q(i,j)=q0
- 	return
-endif
-!----------------------------------------------------------------------------
+tangent_success=.false.
 if (tangent_Flag(i,j)) then
 !use the plane perpendicular to the field line to calculate Q
 
-call ij2vp(i, j, vp)
-forall(k=0:2)
-	boundary_mark(1+2*k)=vp(k)<pmin(k)+delta
-	boundary_mark(2+2*k)=vp(k)>pmax(k)-delta
-endforall
-
-if (count(boundary_mark) .eq. 0) then
+	call ij2vp(i, j, vp)
 
 	call interpolateB(vp, bp)
 
@@ -316,7 +298,8 @@ if (count(boundary_mark) .eq. 0) then
 	    (rbs .eq. rbsb1) .and. (rbs .eq. rbsb2) .and. &
 	    (rbe .eq. rbea1) .and. (rbe .eq. rbea2) .and. &
 	    (rbe .eq. rbeb1) .and. (rbe .eq. rbeb2)) then
-	
+		tangent_success=.true.
+  
 		sxx = rsa1(s_index1)-rsa2(s_index1)
 		syx = rsa1(s_index2)-rsa2(s_index2)
 		sxy = rsb1(s_index1)-rsb2(s_index1)
@@ -334,8 +317,24 @@ if (count(boundary_mark) .eq. 0) then
 		q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta_cs)**4.)
 		
 	endif
+
+	if (.not. tangent_success) then
+		call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
+		q(i,j)=q0
+	endif
+	return
 endif
-return
+!----------------------------------------------------------------------------
+!some problematic sites are filled with trace_scott
+if ((.not. tangent_Flag(i,j) .and.                                       &
+	 (((i .gt.    0) .and. tangent_Flag(i-1, j)) .or.                &
+	  ((i .lt. q1m1) .and. tangent_Flag(i+1, j)) .or.                &
+	  ((j .gt.    0) .and. tangent_Flag(i, j-1)) .or.                &
+	  ((j .lt. q2m1) .and. tangent_Flag(i, j+1)) .or. .not. bkey))) then
+	call ij2vp(i, j, vp)
+	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
+	q(i,j)=q0
+ 	return
 endif
 !----------------------------------------------------------------------------
 if (bkey) then
