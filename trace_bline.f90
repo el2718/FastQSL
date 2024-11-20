@@ -695,6 +695,13 @@ logical:: twistFlag, z0Flag
 twist0 =0.
 length0=0.
 !----------------------------------------------------------------------------
+if (.not. all(pmin<=vp .and. vp<=pmax)) then
+	rbs=7
+ 	rbe=7
+  	return
+endif
+!----------------------------------------------------------------------------
+
 z0flag= vp0(2) .eq. zmin
 
 if (incline .le. min_incline)  then
