@@ -228,7 +228,7 @@ rbsa1, rbea1, rbsa2, rbea2, rbsb1, rbeb1, rbsb2, rbeb2
 logical:: margin_flag1, margin_flag2, bkey, boundary_mark(1:6), &
 bkeys1, bkeys2, bkeys11, bkeys12, bkeys21, bkeys22, &
 bkeye1, bkeye2, bkeye11, bkeye12, bkeye21, bkeye22
-real:: q0, q_perp0, length0, twist0, &
+real:: q0, q_perp0, length0, twist0, delta_cs, &
 sxx, sxy, syx, syy, exx, exy, eyx, eyy, nxx, nxy, nyx, nyy, &
 vp(0:2), rs(0:2), re(0:2), bp(0:2), u0(0:2), v0(0:2), &
 vpa1(0:2), rsa1(0:2), rea1(0:2), vpa2(0:2), rsa2(0:2), rea2(0:2), &
@@ -302,9 +302,10 @@ if (count(boundary_mark) .eq. 0) then
 	v0=v0/norm2(v0)
 	call cross_product(bp, v0, u0)
 	u0=u0/norm2(u0)
-	
-	vpa1=vp+delta*u0; vpa2=vp-delta*u0
-	vpb1=vp+delta*v0; vpb2=vp-delta*v0
+ 
+	delta_cs=delta*0.5
+	vpa1=vp+delta_cs*u0; vpa2=vp-delta_cs*u0
+	vpb1=vp+delta_cs*v0; vpb2=vp-delta_cs*v0
 	
 	call trace_bline(vpa1, rsa1, rea1, rbsa1, rbea1, length0, twist0, .false., 1.)	
 	call trace_bline(vpa2, rsa2, rea2, rbsa2, rbea2, length0, twist0, .false., 1.)	
@@ -330,7 +331,7 @@ if (count(boundary_mark) .eq. 0) then
 		nyx =  eyx*syy - eyy*syx
 		nyy = -eyx*sxy + eyy*sxx
 			
-		q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta)**4.)
+		q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta_cs)**4.)
 		return
 	endif
 endif
