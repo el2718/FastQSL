@@ -332,9 +332,10 @@ if (count(boundary_mark) .eq. 0) then
 		nyy = -eyx*sxy + eyy*sxx
 			
 		q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta_cs)**4.)
-		return
+		
 	endif
 endif
+return
 endif
 !----------------------------------------------------------------------------
 if (bkey) then
