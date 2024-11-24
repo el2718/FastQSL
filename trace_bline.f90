@@ -253,24 +253,24 @@ real:: gradBp(0:2,0:2), CurlBp(0:2)
 !----------------------------------------------------------------------------
 if (i .eq. 0) then
 	gradBp(0,1:2) =-1.5*Bfield(1:2,0,j,k)   +2.0*Bfield(1:2,1,j,k)     -0.5*Bfield(1:2,2,j,k)
-else  if (i .eq. xend) then
-	gradBp(0,1:2) = 1.5*Bfield(1:2,xend,j,k)-2.0*Bfield(1:2,xend-1,j,k)+0.5*Bfield(1:2,xend-2,j,k)
+else  if (i .eq. nxm1) then
+	gradBp(0,1:2) = 1.5*Bfield(1:2,nxm1,j,k)-2.0*Bfield(1:2,nxm1-1,j,k)+0.5*Bfield(1:2,nxm1-2,j,k)
 else
 	gradBp(0,1:2) = (Bfield(1:2,i+1,j,k)-Bfield(1:2,i-1,j,k))*0.5
 endif
 !----------------------------------------------------------------------------
 if (j .eq. 0) then
 	gradBp(1,0:2:2) =-1.5*Bfield(0:2:2,i,0,k)   +2.0*Bfield(0:2:2,i,1,k)     -0.5*Bfield(0:2:2,i,2,k)
-else if (j .eq. yend) then
-	gradBp(1,0:2:2) = 1.5*Bfield(0:2:2,i,yend,k)-2.0*Bfield(0:2:2,i,yend-1,k)+0.5*Bfield(0:2:2,i,yend-2,k)
+else if (j .eq. nym1) then
+	gradBp(1,0:2:2) = 1.5*Bfield(0:2:2,i,nym1,k)-2.0*Bfield(0:2:2,i,nym1-1,k)+0.5*Bfield(0:2:2,i,nym1-2,k)
 else
 	gradBp(1,0:2:2) = (Bfield(0:2:2,i,j+1,k)-Bfield(0:2:2,i,j-1,k))*0.5
 endif
 !----------------------------------------------------------------------------
 if (k .eq. 0) then
 	gradBp(2,0:1) =-1.5*Bfield(0:1,i,j,0)   +2.0*Bfield(0:1,i,j,1)     -0.5*Bfield(0:1,i,j,2)
-else if (k .eq. zend) then
-	gradBp(2,0:1) = 1.5*Bfield(0:1,i,j,zend)-2.0*Bfield(0:1,i,j,zend-1)+0.5*Bfield(0:1,i,j,zend-2)
+else if (k .eq. nzm1) then
+	gradBp(2,0:1) = 1.5*Bfield(0:1,i,j,nzm1)-2.0*Bfield(0:1,i,j,nzm1-1)+0.5*Bfield(0:1,i,j,nzm1-2)
 else
 	gradBp(2,0:1) = (Bfield(0:1,i,j,k+1)-Bfield(0:1,i,j,k-1))*0.5
 endif
