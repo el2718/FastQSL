@@ -754,11 +754,7 @@ do sign_dt=-1,1,2
 	call correct_foot(vp_tmp, vp1, sign_dt, rb)
 	
 	if (rb .eq. 0 .or. rb .eq. 7) then 
-		if (sign_dt .eq. -1) then
-			rs=vp1; rbs=rb
-		else
-			re=vp1; rbe=rb
-		endif
+  		rbs=rb; rbe=rb
 		return
 	endif
 
