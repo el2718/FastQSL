@@ -684,7 +684,7 @@ logical:: twistFlag, z0Flag
 twist0 =0.
 length0=0.
 !----------------------------------------------------------------------------
-if (.not. all(pmin<=vp .and. vp<=pmax)) then
+if (.not. all(pmin<=vp0 .and. vp0<=pmax)) then
 	rbs=7
  	rbe=7
   	return
