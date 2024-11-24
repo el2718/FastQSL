@@ -56,7 +56,7 @@ END subroutine grad_unit_vec_B_grid0
 subroutine grad_unit_vec_B_grid_stretch(i, j, k, grad_unit_vec_B)
 use field_common
 implicit none
-integer:: i, j, k, ci0, cj0, ck0, s, t
+integer:: i, j, k, ci0, cj0, ck0, t
 real:: coef(0:2, 0:2), grad_unit_vec_B(0:2,0:2)
 !----------------------------------------------------------------------------
 call diff_coefficent(i, j, k, ci0, cj0, ck0, coef)
@@ -64,8 +64,12 @@ grad_unit_vec_B=0.0
 do t=0,2
 	grad_unit_vec_B(0,:)=grad_unit_vec_B(0,:)+&
 		coef(t, 0)*Bfield(:, i+ci0+t, j, k)/norm2(Bfield(:, i+ci0+t, j, k))
+enddo
+do t=0,2
 	grad_unit_vec_B(1,:)=grad_unit_vec_B(1,:)+&
 		coef(t, 1)*Bfield(:, i, j+cj0+t, k)/norm2(Bfield(:, i, j+cj0+t, k))
+enddo
+do t=0,2
 	grad_unit_vec_B(2,:)=grad_unit_vec_B(2,:)+&
 		coef(t, 2)*Bfield(:, i, j, k+ck0+t)/norm2(Bfield(:, i, j, k+ck0+t))		
 enddo
