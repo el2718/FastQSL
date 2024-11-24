@@ -61,15 +61,13 @@ real:: coef(0:2, 0:2), grad_unit_vec_B(0:2,0:2)
 !----------------------------------------------------------------------------
 call diff_coefficent(i, j, k, ci0, cj0, ck0, coef)
 grad_unit_vec_B=0.0
-do s=0,2
 do t=0,2
-	grad_unit_vec_B(0,s)=grad_unit_vec_B(0,s)+&
-		coef(t, 0)*Bfield(s, i+ci0+t, j, k)/norm2(Bfield(:, i+ci0+t, j, k))
-	grad_unit_vec_B(1,s)=grad_unit_vec_B(1,s)+&
-		coef(t, 1)*Bfield(s, i, j+cj0+t, k)/norm2(Bfield(:, i, j+cj0+t, k))
-	grad_unit_vec_B(2,s)=grad_unit_vec_B(2,s)+&
-		coef(t, 2)*Bfield(s, i, j, k+ck0+t)/norm2(Bfield(:, i, j, k+ck0+t))		
-enddo
+	grad_unit_vec_B(0,:)=grad_unit_vec_B(0,:)+&
+		coef(t, 0)*Bfield(:, i+ci0+t, j, k)/norm2(Bfield(:, i+ci0+t, j, k))
+	grad_unit_vec_B(1,:)=grad_unit_vec_B(1,:)+&
+		coef(t, 1)*Bfield(:, i, j+cj0+t, k)/norm2(Bfield(:, i, j+cj0+t, k))
+	grad_unit_vec_B(2,:)=grad_unit_vec_B(2,:)+&
+		coef(t, 2)*Bfield(:, i, j, k+ck0+t)/norm2(Bfield(:, i, j, k+ck0+t))		
 enddo
 
 END subroutine grad_unit_vec_B_grid_stretch
