@@ -520,7 +520,10 @@ IF z0Flag THEN BEGIN
 		readu, unit, twist
 		close, unit
 		if preview then begin
-			im=bytscl(twist,min=-2,max=2,/nan)
+			twist_tmp=twist
+			abnormal=WHERE(FINITE(twist, /NAN))
+			if (abnormal[0] ne -1) then twist_tmp[abnormal]=0.
+			im=bytscl(twist_tmp, min=-2, max=2)
 			write_png, odir+fstr+'_twist.png', im, r_doppler, g_doppler, b_doppler
 		endif
 	endif
@@ -593,7 +596,10 @@ IF cFlag THEN BEGIN
 		readu, unit, twist
 		close, unit
 		if preview then begin
-			im=bytscl(twist,min=-2,max=2,/nan)
+			twist_tmp=twist
+			abnormal=WHERE(FINITE(twist, /NAN))
+			if (abnormal[0] ne -1) then twist_tmp[abnormal]=0.
+			im=bytscl(twist_tmp, min=-2, max=2)
 			write_png, odir+fstr+'_twist.png', im, r_doppler, g_doppler, b_doppler
 		endif
 	endif	   
