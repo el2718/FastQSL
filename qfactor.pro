@@ -561,10 +561,10 @@ IF cFlag THEN BEGIN
 	if (ss2[0] ne -1) then qcs_orig[ss2]=!values.F_NAN
 	
 	if preview then begin
-		im=bytscl(alog10(qcs_orig>1.),min=0,max=5,/nan)
+		im=bytscl(alog10(qcs_orig>1.),min=1,max=5,/nan)
 		write_png, odir+fstr+'_logq_orig.png', im
 		
-		im=bytscl(logq,min=0,max=5,/nan)
+		im=bytscl(logq,min=1,max=5,/nan)
 		write_png, odir+fstr+'_logq.png', im
 		im=bytscl(length,min=0,max=length_top,/nan)
 		write_png, odir+fstr+'_length.png', im
@@ -583,9 +583,9 @@ IF cFlag THEN BEGIN
 		logq_perp=alog10(q_perp>1.)		
 		
 		if preview then begin
-			im=bytscl(logq_perp_orig,min=0,max=5,/nan)
+			im=bytscl(logq_perp_orig,min=1,max=5,/nan)
 			write_png, odir+fstr+'_logq_perp_orig.png', im
-			im=bytscl(logq_perp,min=0,max=5,/nan)
+			im=bytscl(logq_perp,min=1,max=5,/nan)
 			write_png, odir+fstr+'_logq_perp.png', im
 		endif
 	endif
