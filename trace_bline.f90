@@ -491,18 +491,13 @@ do while ( continue_flag )
 !----------------------------------------------------------------------------
 	call vp_rboundary(vp1, rb, rb_index)
 	if (rb .eq. 0) then
-		continue_flag = error .gt. tol_this_1 .and. (abs(dt) .gt. min_step)
-		if (continue_flag) then
-			dt=dt*0.618
+ 		continue_flag = error .gt. tol_this_1 .and. (abs(dt) .gt. min_step)
+		if (error .gt. 0.) then
+			dt=dt* ((tol_this_1/error)**0.2)*0.9
 		else
-			if (error .le. tol_this_1) then
-				if (error .le. (tol_this_1)/((100./abs(dt*0.618))**5.) ) then
-					dt=sign(100., dt)
-				else
-					dt=dt* ((tol_this_1/error)**0.2)*0.618
-				endif
-			endif
+			dt=sign(100., dt)
 		endif
+		if (abs(dt) .gt. 100.) dt=sign(100., dt)
 		if (abs(dt) .lt. min_step) dt=sign(min_step, dt)
 !----------------------------------------------------------------------------
 	else
