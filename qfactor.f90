@@ -37,10 +37,10 @@ if(bzp>0.0) then
 		e_index=(6-rbe)/2
 		bnr(i, j)=abs(DBLE(bzp)/bp(e_index))
 	endif
-	
 else if (bzp .eq. 0.0) then
 	sign2d(i,j)=0.0
-	reboundary(i, j)=0
+	reboundary(i, j)=1
+	reF=vp
 else !bzp < 0.0
 	sign2d(i,j)=-1.0
 	reboundary(i, j)=rbs	
