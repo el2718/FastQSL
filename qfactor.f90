@@ -26,12 +26,11 @@ endif
 
 length(i, j)=length0
 if (twistFlag) twist(i, j)=twist0
+if (vflag) rboundary_tmp(i, j)=rbs+8*rbe
 
 if(bzp>0.0) then 
 	sign2d(i,j)=1.0
 	reboundary(i, j)=rbe
-	if (vflag) rboundary_tmp(i, j)=1+8*rbe
-	
 	reF(:, i, j)=re
 	if ( (rbe .ne. 0) .and.(rbe .ne. 7)) then 
 		call interpolateB(re, bp)
@@ -42,11 +41,9 @@ if(bzp>0.0) then
 else if (bzp .eq. 0.0) then
 	sign2d(i,j)=0.0
 	reboundary(i, j)=0
-	if (vflag) rboundary_tmp(i, j)=0
 else !bzp < 0.0
 	sign2d(i,j)=-1.0
 	reboundary(i, j)=rbs	
-	if (vflag) rboundary_tmp(i, j)=rbs+8
 	reF(:, i, j)=rs
 	if ( (rbs .ne. 0) .and.(rbs .ne. 7)) then 	
 		call interpolateB(rs, bp)
@@ -187,6 +184,7 @@ rsF(:, i, j)=rs
 reF(:, i, j)=re
 rsboundary( i, j)=rbs
 reboundary( i, j)=rbe
+if (vflag) rboundary_tmp(i, j)=rbs+8*rbe
 
 length(i, j)=length0
 if (twistFlag) twist(i, j)=twist0
@@ -553,7 +551,7 @@ if (vflag) then
 	if (zreg(0) .eq. zmin) then
 		call qfactor0()
 		write(1) q
-		write(2) rboundary_tmp  ! had been transferred to rbs+8*rbe in subroutine qfactor0_bridge
+		write(2) rboundary_tmp
 		if (scottFlag) write(3) q_perp
 		if (twistFlag) write(4) twist
 		k0=1
@@ -564,7 +562,6 @@ if (vflag) then
 	do k=k0, qz-1			
 		cut_coordinate=zreg(0)+k*delta
 		call qcs()
-		rboundary_tmp=rsboundary(0:q1m1, 0:q2m1)+8*reboundary(0:q1m1, 0:q2m1)	
 		write(1) q
 		write(2) rboundary_tmp
 		if (scottFlag) write(3) q_perp
