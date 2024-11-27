@@ -40,7 +40,7 @@ if(bzp>0.0) then
 else if (bzp .eq. 0.0) then
 	sign2d(i,j)=0.0
 	reboundary(i, j)=1
-	reF=vp
+	reF(:, i, j)=vp
 else !bzp < 0.0
 	sign2d(i,j)=-1.0
 	reboundary(i, j)=rbs	
