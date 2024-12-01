@@ -568,7 +568,7 @@ end select
 end subroutine vp_rboundary
 
 
-subroutine correct_foot(vp, vp1, sign_dt, rb)
+subroutine correct_foot(vp_orig, vp1, sign_dt, rb)
 use trace_common
 implicit none
 real:: dt, ds0, ds1, alpha, &
@@ -578,14 +578,15 @@ integer:: sign_dt, rb, rb_index, it
 call vp_rboundary(vp1, rb, rb_index)
 if (rb .eq. 0) return
 
-if (any((vp .eq. pmin) .or. (vp .eq. pmax))) then
-	vp1=vp
+if (any((vp_orig .eq. pmin) .or. (vp_orig .eq. pmax))) then
+	vp1=vp_orig
 	return
 endif
 
-vp0=vp
 vp1_orig=vp1
-vp_orig =vp
+vp =vp_orig
+vp0=vp
+
 if (rb .ne. 7) then 
 	if( mod(rb, 2) .eq. 1) then
 		ds0=pmin(rb_index)- vp0(rb_index)
