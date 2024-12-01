@@ -294,14 +294,14 @@ enddo
 end subroutine RKF45_scott
 
 
-subroutine correct_foot_scott(vector9, vector9_1, sign_dt, rb)
+subroutine correct_foot_scott(vector9_orig, vector9_1, sign_dt, rb)
 use trace_common
 implicit none
 real:: dt, dt0, ds0, ds1, vp(0:2), vp0(0:2), vp1(0:2), alpha, &
 vector9(0:8), vector9_0(0:8), vector9_1(0:8), vector9_orig(0:8), vector9_1_orig(0:8)
 integer:: sign_dt, rb, rb_index, it
 !---------------------------------------------------------------------------
-vp=vector9(0:2)
+vp=vector9_orig(0:2)
 vp1=vector9_1(0:2)
 dt0=dt
 
@@ -309,13 +309,12 @@ call vp_rboundary(vp1, rb, rb_index)
 if (rb .eq. 0) return
 
 if (any((vp .eq. pmin) .or. (vp .eq. pmax))) then
-	vector9_1=vector9
+	vector9_1=vector9_orig
 	return
 endif
 
-vector9_orig  =vector9
 vector9_1_orig=vector9_1
-vector9_0=vector9
+vector9_0=vector9_orig
 
 if (rb .ne. 7) then 
 	vp0=vector9_0(0:2)
