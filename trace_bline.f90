@@ -513,8 +513,8 @@ do while ( continue_flag )
 					ds0=pmax(rb_index)- vp0(rb_index)
 					ds1= vp1(rb_index)-pmax(rb_index)
 				endif
-				if (abs(ds) .ge. 2.*norm2(vp1-vp0)) then
-					dt=dt*0.5
+				if (abs(ds0+ds1) .le. 0.05*norm2(vp1-vp0)) then
+					 dt=sign(min_step, dt)
 				else if (abs(dt*ds0/(ds0+ds1)) .lt. min_step) then
 					continue_flag = .false.
 				else
