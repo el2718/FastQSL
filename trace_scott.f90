@@ -315,6 +315,7 @@ endif
 
 vector9_1_orig=vector9_1
 vector9_0=vector9_orig
+vector9=vector9_orig
 
 if (rb .ne. 7) then 
 	vp0=vector9_0(0:2)
