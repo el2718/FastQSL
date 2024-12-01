@@ -246,6 +246,7 @@ do while ( continue_flag )
 	error = norm2(dvp)
 	
 !----------------------------------------------------------------------------
+	vp1=vector9_1(0:2)
 	call vp_rboundary(vp1, rb, rb_index)
 	if (rb .eq. 0) then
 		continue_flag = error .gt. tol_this_1 .and. (abs(dt) .gt. min_step)
