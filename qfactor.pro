@@ -383,7 +383,7 @@ endif else begin
 	if (i ge 4) then delta_str='_delta'+string(round(delta),'(i0)') $
 	            else delta_str='_delta'+string(delta,'(f0.'+string(4-i)+')')
 	     
-	fstr = head_str + cut_str + delta_str
+	fstr = head_str + delta_str + cut_str
 endelse
 
 file_sav=odir+fstr+'.sav'
