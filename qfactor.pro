@@ -268,7 +268,7 @@ if curlB_out and curlB_exist then begin
 endif
 ;----------------------------------------------------------------------------------------------
 ; the temporary directory for the data transmission between Fortran and IDL
-if RAMtmp then tmp_dir='/dev/shm/tmp/' else tmp_dir= odir+'tmp/'
+if RAMtmp then tmp_dir='/dev/shm/FastQSLtmp/' else tmp_dir= odir+'FastQSLtmp/'
 if ~file_test(tmp_dir) then file_mkdir, tmp_dir
 dummy=file_search(tmp_dir,'*.{txt,bin}',count=nf)
 if nf ne 0 then file_delete, dummy
