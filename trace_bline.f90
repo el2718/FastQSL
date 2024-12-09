@@ -515,8 +515,6 @@ do while ( continue_flag )
 				endif
 				if (abs(ds0+ds1) .le. 0.05*norm2(vp1-vp0)) then
 					 dt=sign(min_step, dt)
-				else if (abs(dt*ds0/(ds0+ds1)) .lt. min_step) then
-					continue_flag = .false.
 				else
 					! then if a next do loop exist, continue_flag will be .false. in that loop
 					! because dt will \approx 0.5*sign(min_step, dt) in that loop
