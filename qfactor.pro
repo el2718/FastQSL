@@ -1,6 +1,6 @@
 PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, csFlag=csFlag,     $
              factor=factor, delta=delta,  RK4Flag=RK4Flag, step=step, tol=tol, maxsteps=maxsteps, $
-             scottFlag=scottFlag, twistFlag=twistFlag, curlB_out=curlB_out, odir=odir, fstr=fstr, $
+             scottFlag=scottFlag, twistFlag=twistFlag, save_curlB=save_curlB, odir=odir, fstr=fstr, $
              nbridges=nbridges, no_preview=no_preview, tmpB=tmpB, RAMtmp=RAMtmp, compress=compress
 ;+
 ; PURPOSE:
@@ -77,7 +77,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;		
 ;   twistFlag:  to calculate twist number Tw; see Liu_2016_ApJ_818_148; default is 0
 ;
-;   curlB_out:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; default is 0
+;   save_curlB:  to save curlB at odir+'curlB.sav'; curlBx, curlBy, curlBz have same dimensions as Bx, By, Bz; default is 0
 ;
 ;   odir:       directory to save the results
 ;		
@@ -167,7 +167,7 @@ PRO qfactor, bx, by, bz, xa=xa, ya=ya, za=za, xreg=xreg, yreg=yreg, zreg=zreg, c
 ;   Jun 10,2022 J. Chen, adapted to stretched grids
 ;   Oct 11,2022 J. Chen, adapted to Windows
 ;   Oct 13,2022 J. Chen, check the existence of infinite or NaN values on grids
-;   Nov 25,2022 J. Chen, add a keyword of curlB_out to save curlB
+;   Nov 25,2022 J. Chen, add a keyword of save_curlB to save curlB
 ;   Jan 17,2023 J. Chen, integrate doppler color in qfactor.pro, doppler_color.pro is not more necessary;
 ;                        to aviod an error in a remote server: % TVLCT: Unable to open X Windows display
 ;   Jan 29,2024 J. Chen, polish some parts
@@ -238,7 +238,7 @@ endif
 if  keyword_set(twistFlag)  then twistFlag =1B else twistFlag =0B
 if  keyword_set(RK4Flag)    then RK4Flag   =1B else RK4Flag   =0B
 if  keyword_set(scottFlag)  then scottFlag =1B else scottFlag =0B
-if  keyword_set(curlB_out)  then curlB_out =1B else curlB_out =0B
+if  keyword_set(save_curlB) then save_curlB =1B else save_curlB =0B
 if  keyword_set(no_preview) then preview   =0B else preview   =1B
 if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
@@ -262,7 +262,7 @@ if ~file_test(odir) then file_mkdir, odir
 ; check the existence of curlB.sav
 file_curlB=odir+'curlB.sav'
 curlB_exist=file_test(file_curlB)
-if curlB_out and curlB_exist then begin
+if save_curlB and curlB_exist then begin
 	print, "'"+file_curlB+"' already exists"
 	return
 endif
@@ -279,7 +279,7 @@ get_lun,unit
 openw,  unit, tmp_dir+'head.txt'
 printf, unit, long(nx), long(ny), long(nz), long(nbridges), float(delta), long(maxsteps)
 printf, unit, float(xreg), float(yreg), float(zreg), float(step), float(tol)
-printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), long(curlB_out)
+printf, unit, long(twistFlag), long(RK4flag), long(scottFlag), long(csflag), long(save_curlB)
 close,  unit
 
 openw,  unit, tmp_dir+'b3d.bin'
@@ -321,7 +321,7 @@ print, time_elapsed+' elapsed for calculation'
 
 ; ################################### retrieving results ###################################################### 
 ; save curlB
-if curlB_out then begin
+if save_curlB then begin
 	curlB=fltarr(3, nx, ny, nz)
 	openr, unit, tmp_dir+'curlB.bin'
 	readu, unit, curlB
