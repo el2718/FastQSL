@@ -89,6 +89,6 @@ qfactor, Bx, By, Bz, xreg=[scale/4,scale/2], yreg=[scale/9,scale/3], zreg=[top/4
 delta=0.8, tol=1.0e-3, odir= 'qfactor'
 
 ; exporting curlB
-qfactor, Bx, By, Bz, odir= 'qfactor', /curlB_out
+qfactor, Bx, By, Bz, odir= 'qfactor', /save_curlB
 
 end
