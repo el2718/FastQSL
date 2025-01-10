@@ -238,7 +238,7 @@ endif
 if  keyword_set(twistFlag)  then twistFlag =1B else twistFlag =0B
 if  keyword_set(RK4Flag)    then RK4Flag   =1B else RK4Flag   =0B
 if  keyword_set(scottFlag)  then scottFlag =1B else scottFlag =0B
-if  keyword_set(save_curlB) then save_curlB =1B else save_curlB =0B
+if  keyword_set(save_curlB) then save_curlB=1B else save_curlB=0B
 if  keyword_set(no_preview) then preview   =0B else preview   =1B
 if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
