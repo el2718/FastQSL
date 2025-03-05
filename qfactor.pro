@@ -244,7 +244,7 @@ if  keyword_set(tmpB)       then tmpB      =1B else tmpB      =0B
 if  keyword_set(RAMtmp)     then RAMtmp    =1B else RAMtmp    =0B
 if ~keyword_set(tol)        then tol=10.0^(-4.)
 if ~keyword_set(step)       then step=1.
-if ~keyword_set(maxsteps)   then maxsteps=long(4*(nx+ny+nz)/step)
+if ~keyword_set(maxsteps)   then maxsteps=long(10*(nx+ny+nz)/step)
 ;----------------------------------------------------------------------------------------------
 ; the directory for output
 cd, current = cdir
