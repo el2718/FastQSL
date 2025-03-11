@@ -65,11 +65,11 @@ enddo
 call get_command_argument(1, puzzle)
 
 if (puzzle .eq. "" .or.         &
-	trim(puzzle) .eq. "-h" .or. &
+    trim(puzzle) .eq. "-h" .or. &
     trim(puzzle) .eq. "-b" .or. &
-	trim(puzzle) .eq. "-o" .or. &
-	trim(puzzle) .eq. "-s" .or. &
-	trim(puzzle) .eq. "-e") then
+    trim(puzzle) .eq. "-o" .or. &
+    trim(puzzle) .eq. "-s" .or. &
+    trim(puzzle) .eq. "-e") then
 	sudoku=0
 	if (outfile) filename='All_zero'
 else
