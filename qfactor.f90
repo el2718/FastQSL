@@ -1,585 +1,594 @@
-!contact: Chen, Jun; el2718@mail.ustc.edu.cn
-!gfortran -O3 sudoku.f90 -o sudoku.x
+!    ifort -o qfactor.x qfactor.f90 -fopenmp -O3 -xHost -ipo
+! gfortran -o qfactor.x qfactor.f90 -fopenmp -O3 -march=native
+! -O3, -xHost, -ipo, -march=native are for a better efficiency
 
-module share
+include 'trace_bline.f90'
+include 'trace_scott.f90'
+
+subroutine qfactor0_bridge(i,j)
+use qfactor_common
 implicit none
-integer(8)::n_solved, solved_max
-integer::eliminated_max, m_shift(9,9)
-character(len=127)::filename
-logical::outfile, verbose, brute_force
-end module share
+real:: bzp, bp(0:2), vp(0:2), rs(0:2), re(0:2), twist0, length0, q0, q_perp0, incline
+integer:: i, j, rbs, rbe, s_index, e_index
+!----------------------------------------------------------------------------
+call ij2vp(i, j, vp)
+call interpolateB(vp, bp)
+bzp=bp(2)
 
-
-program main
-use share
-implicit none
-integer::sudoku(9,9), sudoku_orig(9,9), i, j, narg
-real::x(9,9)
-character(len=127):: puzzle, line_str, arg
-logical:: exist_flag
-!--------------------------------------------
-! default setting
-brute_force=.false.
-outfile=.false.
-solved_max=2
-eliminated_max=0
-
-narg=iargc()
-
-do i=1, narg
-	call get_command_argument(i, arg)
-	if (arg .eq. '-h') then
-		print*, 'usage: ./sudoku.x [puzzle] [-h] [-b] [-o] [-s solved_max] [-e eliminated_max]'
-		print*, '' 
-		print*, 'puzzle: a text file with 81 integer elements of a puzzle, a 0 or a . represents an empty cell'
-		print*, '' 
-		print*, '-h, find help' 
-		print*, '' 
-		print*, '-b, use brute force to solve the puzzle; just try and check the consistency with back tracking.  Otherwise logical strategies are used by default, see https://www.sudokuwiki.org/Strategy_Families'
-		print*, '' 
-		print*, '-o, export results to text files. A puzzle with 81 non-empty elements will not be exported'
-		print*, '' 
-		print*, '-s solved_max; the maximum number of solutions that the program could give, in case a sudoku may have multiple solutions.'
-		print*, '   --If set to be larger than 1, non-repeative solutions will be presented'
-		print*, '   --If set to a number more than the count of all solutions, the count will be reported'
-		print*, '   --The default value of solved_max is 2, to check the uniqueness of the solution'
-		print*, '   --If set to 1, will not check the uniqueness, but will be faster'
-		print*, '' 
-		print*, '-e eliminated_max; If a puzzle has a unique solution, eliminating some non-empty elements from the puzzle could still give the same solution. This value is the maximum number of non-empty elements can be eliminated for the same unique solution. If then no any more non-empty element can be eliminated, the actual eliminated number could be smaller than this value'
-		print*, '   --The default value of eliminated_max is 0. If eliminated_max is set to > 0, the eliminated puzzle has the same unique solution will be present. The sequence of elimination is random. This can create a puzzle from a full filled sudodu, e.g. from a solution of another puzzle'
-		return
-	endif
-	if (trim(arg) .eq. '-b') brute_force=.true.
-	if (trim(arg) .eq. '-o') outfile=.true.
-
-	if (trim(arg) .eq. '-s' .and. i .ne. narg) then
-		call get_command_argument(i+1, arg)
-		read(arg,'(i19)') solved_max
-	endif
-	if (trim(arg) .eq. '-e' .and. i .ne. narg) then
-		call get_command_argument(i+1, arg)
-		read(arg, '(i9)') eliminated_max
-	endif
-enddo
-
-call get_command_argument(1, puzzle)
-
-if (puzzle .eq. "" .or.         &
-    trim(puzzle) .eq. "-h" .or. &
-    trim(puzzle) .eq. "-b" .or. &
-    trim(puzzle) .eq. "-o" .or. &
-    trim(puzzle) .eq. "-s" .or. &
-    trim(puzzle) .eq. "-e") then
-	sudoku=0
-	if (outfile) filename='All_zero'
+if (scottFlag) then 
+	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, twistFlag)
+	q(i,j)=q0
+	q_perp(i,j)=q_perp0
 else
-	inquire(file = trim(puzzle), exist=exist_flag)
+	incline=abs(bzp/norm2(bp))
+	call trace_bline(vp, rs, re, rbs, rbe, length0, twist0, twistFlag, incline)
+endif
 
-	if (exist_flag) then
-		if (outfile) then
-			do i=len(puzzle),1,-1
-				if (puzzle(i:i) .eq. ".") then
-					filename=puzzle(1:i-1)
-					exit
-				endif
-			enddo
-		endif
+length(i, j)=length0
+if (twistFlag) twist(i, j)=twist0
+if (vflag) rboundary_tmp(i, j)=rbs+8*rbe
 
-		open(unit=8, file=trim(puzzle), status='old')
-		do j=1, 9
-			read(8, "(A)") line_str
-			do i=1,len(line_str)
-				if (line_str(i:i) .eq. '.') line_str(i:i)='0'
-			enddo
-			read(line_str,*) sudoku(:,j)
-		enddo
-		close(8)
-	else
-		print*, trim(puzzle)//' not exist'
-		return
+if(bzp>0.0) then 
+	sign2d(i,j)=1.0
+	reboundary(i, j)=rbe
+	reF(:, i, j)=re
+	if ( (rbe .ne. 0) .and.(rbe .ne. 7)) then 
+		call interpolateB(re, bp)
+		e_index=(6-rbe)/2
+		bnr(i, j)=abs(DBLE(bzp)/bp(e_index))
+	endif
+else if (bzp .eq. 0.0) then
+	sign2d(i,j)=0.0
+	reboundary(i, j)=1
+	reF(:, i, j)=vp
+else !bzp < 0.0
+	sign2d(i,j)=-1.0
+	reboundary(i, j)=rbs	
+	reF(:, i, j)=rs
+	if ( (rbs .ne. 0) .and.(rbs .ne. 7)) then 	
+		call interpolateB(rs, bp)
+		s_index=(6-rbs)/2
+		bnr(i, j)=abs(DBLE(bzp)/bp(s_index))
 	endif
 endif
 
-call random_seed()
-call random_number(x)
-m_shift=floor(x*9)
-!--------------------------------------------
-write(*,"('  == input ==')")
-call print_sudoku(sudoku)
-sudoku_orig=sudoku
-verbose=.true.
-call resolve(sudoku)	
-
-if (n_solved .eq. 1 .and. solved_max .ge. 2 .and. eliminated_max .gt. 0) call eliminate(sudoku_orig)
-
-end program main
+END subroutine qfactor0_bridge
 
 
-subroutine resolve(sudoku)
-use share
+subroutine qfactor0_calculate(i,j)
+!calculate Q at the photosphere by Titov (2002), 
+!some problematic sites are filled with trace_scott
+use qfactor_common
+use trace_common
 implicit none
-integer::sudoku(9,9)
-logical::candidate(9,9,9), bug_flag
-!--------------------------------------------
-call check_sudoku(sudoku, bug_flag)
-if (bug_flag) then
-	write(*,"('problematic input')")
+integer:: i, j, rb, rbs, rbe, index0, index1, index2, sign_index1, sign_index2
+logical:: bkey1, bkey2, bkey11, bkey12, bkey21, bkey22, margin_flag1, margin_flag2
+real:: nxx, nxy, nyx, nyy, vp(0:2), rs(0:2), re(0:2), length0, twist0, q0, q_perp0
+!----------------------------------------------------------------------------
+rb=reboundary(i,j)
+
+q(i,j)=NaN
+if ((rb .eq. 0) .or. (rb .eq. 7) .or. (bnr(i,j) .eq. 0.0)) return
+
+index0=(6-rb)/2; index1=mod(index0+1,3); index2=mod(index0+2,3)
+
+margin_flag1= (i .eq. 0) .or. (i .eq. q1m1) 
+margin_flag2= (j .eq. 0) .or. (j .eq. q2m1)
+
+bkey1=(.not. margin_flag1) .and. (rb .eq. reboundary(i+1,j)) .and. (rb .eq. reboundary(i-1,j)) 
+bkey2=(.not. margin_flag2) .and. (rb .eq. reboundary(i,j+1)) .and. (rb .eq. reboundary(i,j-1))
+
+bkey11=(i+2 .le. q1m1) .and. (rb .eq. reboundary(i+1,j)) .and. (rb .eq. reboundary(i+2,j))
+bkey12=(i-2 .ge.    0) .and. (rb .eq. reboundary(i-1,j)) .and. (rb .eq. reboundary(i-2,j)) .and. (.not. bkey11)
+bkey21=(j+2 .le. q2m1) .and. (rb .eq. reboundary(i,j+1)) .and. (rb .eq. reboundary(i,j+2))
+bkey22=(j-2 .ge.    0) .and. (rb .eq. reboundary(i,j-1)) .and. (rb .eq. reboundary(i,j-2)) .and. (.not. bkey21)
+
+if (bkey11) sign_index1= 1; if (bkey12) sign_index1=-1
+if (bkey21) sign_index2= 1; if (bkey22) sign_index2=-1
+
+if (bkey1) then
+	nxx=reF(index1, i+1, j)-reF(index1, i-1, j)
+	nyx=reF(index2, i+1, j)-reF(index2, i-1, j)
+else if (bkey11 .or. bkey12) then
+	nxx=(-3*reF(index1, i, j)+4*reF(index1, i+sign_index1, j)- &
+	        reF(index1, i+2*sign_index1, j))*sign_index1	
+	nyx=(-3*reF(index2, i, j)+4*reF(index2, i+sign_index1, j)- &
+	        reF(index2, i+2*sign_index1, j))*sign_index1
+endif
+
+
+if (bkey2) then
+	nxy=reF(index1, i, j+1)-reF(index1, i, j-1)
+	nyy=reF(index2, i, j+1)-reF(index2, i, j-1)
+else if (bkey21 .or. bkey22) then
+	nxy=(-3*reF(index1, i, j)+4*reF(index1, i, j+sign_index2)- &
+	        reF(index1, i, j+2*sign_index2))*sign_index2	
+	nyy=(-3*reF(index2, i, j)+4*reF(index2, i, j+sign_index2)- &
+	        reF(index2, i, j+2*sign_index2))*sign_index2
+endif
+
+if ((bkey1 .or. bkey11 .or. bkey12) .and. (bkey2 .or. bkey21 .or. bkey22)) then
+	q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy) / (bnr(i,j) * (2.0*delta)**2.0)
+else
+ 	call ij2vp(i, j, vp)
+	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
+	q(i,j)=q0
+endif
+end subroutine qfactor0_calculate
+
+
+subroutine qfactor0()
+use qfactor_common
+use trace_common
+implicit none
+integer:: i, j
+!----------------------------------------------------------------------------
+allocate(sign2d(0:q1m1, 0:q2m1))
+ cut_coordinate=zmin
+
+!$OMP PARALLEL DO PRIVATE(i,j), schedule(DYNAMIC)
+	DO j= 0, q2m1
+	DO i= 0, q1m1		 
+		call  qfactor0_bridge(i,j)
+	enddo	
+	enddo
+!$OMP END PARALLEL DO
+
+if (.not. scottFlag) then 
+!$OMP PARALLEL DO PRIVATE(i,j), schedule(DYNAMIC)
+	DO j= 0, q2m1
+	DO i= 0, q1m1 
+		call  qfactor0_calculate(i,j)
+	enddo	
+	enddo
+!$OMP END PARALLEL DO
+endif
+
+call qmin2()
+call out_slogq()
+
+end subroutine qfactor0
+
+
+subroutine qcs_bridge(i,j)
+use qfactor_common
+use trace_common
+implicit none
+real:: vp(0:2), rs(0:2), re(0:2), bp(0:2), bn_0, bn_s, bn_e, &
+twist0, length0, q0, q_perp0, incline
+integer:: i, j, rbs, rbe, s_index0, e_index0
+!----------------------------------------------------------------------------
+call ij2vp(i, j, vp)
+
+if (scottFlag) then
+	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, twistFlag)
+	q(i,j)=q0
+	q_perp(i,j)=q_perp0
+else
+	call interpolateB(vp, bp)	
+	if (csflag) then
+		incline=abs(dot_product(ev3,bp)/ norm2(bp))
+	else
+		incline=abs(bp(Normal_index)/ norm2(bp))
+	endif
+	
+	tangent_Flag(i, j)=incline .lt. min_incline
+
+	! this value is not true, for saving the time of the following tracing
+	if (tangent_Flag(i, j)) incline=1.0 
+	
+	call trace_bline(vp, rs, re, rbs, rbe, length0, twist0, twistFlag, incline)
+endif
+
+rsF(:, i, j)=rs
+reF(:, i, j)=re
+rsboundary( i, j)=rbs
+reboundary( i, j)=rbe
+if (vflag) rboundary_tmp(i, j)=rbs+8*rbe
+
+length(i, j)=length0
+if (twistFlag) twist(i, j)=twist0
+
+if (scottFlag) return
+
+if ((rbe .eq. 0) .or. (rbs .eq. 0) .or. (rbe .eq. 7) .or. (rbs .eq. 7)) return
+
+if (tangent_Flag(i,j)) then 
+	bn_0=norm2(bp)
+else
+	if (csflag) then 
+		bn_0=dot_product(bp, ev3)
+	else
+		bn_0=bp(Normal_index)
+	endif
+endif
+
+e_index0=(6-rbe)/2
+s_index0=(6-rbs)/2
+call interpolateB(re, bp)
+bn_e=bp(e_index0)
+call interpolateB(rs, bp)
+bn_s=bp(s_index0)
+
+bnr(i, j)=abs(DBLE(bn_s)*bn_e/(DBLE(bn_0)**2.))
+
+END subroutine qcs_bridge
+
+
+subroutine qcs_calculate(i,j)
+use qfactor_common
+use trace_common
+implicit none
+integer:: i, j, k, rbs, rbe, maxdim, index1, index2, &
+s_index0, s_index1, s_index2, sign_s_index1, sign_s_index2, &
+e_index0, e_index1, e_index2, sign_e_index1, sign_e_index2, &
+rbsa1, rbea1, rbsa2, rbea2, rbsb1, rbeb1, rbsb2, rbeb2
+logical:: margin_flag1, margin_flag2, tangent_success, bkey, &
+bkeys1, bkeys2, bkeys11, bkeys12, bkeys21, bkeys22, &
+bkeye1, bkeye2, bkeye11, bkeye12, bkeye21, bkeye22
+real:: q0, q_perp0, length0, twist0, delta_cs, &
+sxx, sxy, syx, syy, exx, exy, eyx, eyy, nxx, nxy, nyx, nyy, &
+vp(0:2), rs(0:2), re(0:2), bp(0:2), u0(0:2), v0(0:2), &
+vpa1(0:2), rsa1(0:2), rea1(0:2), vpa2(0:2), rsa2(0:2), rea2(0:2), &
+vpb1(0:2), rsb1(0:2), reb1(0:2), vpb2(0:2), rsb2(0:2), reb2(0:2)
+!----------------------------------------------------------------------------
+rbs=rsboundary(i,j)
+rbe=reboundary(i,j)
+s_index0=(6-rbs)/2; s_index1=mod(s_index0+1,3); s_index2=mod(s_index0+2,3)
+e_index0=(6-rbe)/2; e_index1=mod(e_index0+1,3); e_index2=mod(e_index0+2,3)
+
+q(i,j)=NaN
+if((rbs .eq. 0) .or. (rbe .eq. 0) .or. (rbs .eq. 7) .or. (rbe .eq. 7)) return
+
+margin_flag1= (i .eq. 0) .or. (i .eq. q1m1) 
+margin_flag2= (j .eq. 0) .or. (j .eq. q2m1)
+
+bkeys1 = (.not. margin_flag1) .and. ( rbs .eq. rsboundary(i+1,j)) .and. ( rbs .eq. rsboundary(i-1,j)) 
+bkeys2 = (.not. margin_flag2) .and. ( rbs .eq. rsboundary(i,j+1)) .and. ( rbs .eq. rsboundary(i,j-1))
+bkeye1 = (.not. margin_flag1) .and. ( rbe .eq. reboundary(i+1,j)) .and. ( rbe .eq. reboundary(i-1,j)) 
+bkeye2 = (.not. margin_flag2) .and. ( rbe .eq. reboundary(i,j+1)) .and. ( rbe .eq. reboundary(i,j-1))
+
+bkeye11=(i+2 .le. q1m1) .and. ( rbe .eq. reboundary(i+1,j)) .and. ( rbe .eq. reboundary(i+2,j))
+bkeye12=(i-2 .ge.    0) .and. ( rbe .eq. reboundary(i-1,j)) .and. ( rbe .eq. reboundary(i-2,j)) .and. (.not. bkeye11)
+bkeye21=(j+2 .le. q2m1) .and. ( rbe .eq. reboundary(i,j+1)) .and. ( rbe .eq. reboundary(i,j+2))
+bkeye22=(j-2 .ge.    0) .and. ( rbe .eq. reboundary(i,j-1)) .and. ( rbe .eq. reboundary(i,j-2)) .and. (.not. bkeye21)
+
+bkeys11=(i+2 .le. q1m1) .and. ( rbs .eq. rsboundary(i+1,j)) .and. ( rbs .eq. rsboundary(i+2,j))
+bkeys12=(i-2 .ge.    0) .and. ( rbs .eq. rsboundary(i-1,j)) .and. ( rbs .eq. rsboundary(i-2,j)) .and. (.not. bkeys11)
+bkeys21=(j+2 .le. q2m1) .and. ( rbs .eq. rsboundary(i,j+1)) .and. ( rbs .eq. rsboundary(i,j+2))
+bkeys22=(j-2 .ge.    0) .and. ( rbs .eq. rsboundary(i,j-1)) .and. ( rbs .eq. rsboundary(i,j-2)) .and. (.not. bkeys21)
+
+bkey=(bkeys1 .or. bkeys11 .or. bkeys12) .and. &
+     (bkeys2 .or. bkeys21 .or. bkeys22) .and. &
+     (bkeye1 .or. bkeye11 .or. bkeye12) .and. &
+     (bkeye2 .or. bkeye21 .or. bkeye22)
+!----------------------------------------------------------------------------
+tangent_success=.false.
+if (tangent_Flag(i,j)) then
+!use the plane perpendicular to the field line to calculate Q
+
+	call ij2vp(i, j, vp)
+
+	call interpolateB(vp, bp)
+
+	maxdim=sum(maxloc(abs(bp)))-1
+	index1=mod(maxdim+1,3)
+	index2=mod(maxdim+2,3)	
+	
+	v0(maxdim)= bp(index1)
+	v0(index1)=-bp(maxdim)
+	v0(index2)=0.
+
+	v0=v0/norm2(v0)
+	call cross_product(bp, v0, u0)
+	u0=u0/norm2(u0)
+ 
+	delta_cs=delta*0.5
+	vpa1=vp+delta_cs*u0; vpa2=vp-delta_cs*u0
+	vpb1=vp+delta_cs*v0; vpb2=vp-delta_cs*v0
+	
+	call trace_bline(vpa1, rsa1, rea1, rbsa1, rbea1, length0, twist0, .false., 1.)	
+	call trace_bline(vpa2, rsa2, rea2, rbsa2, rbea2, length0, twist0, .false., 1.)	
+	call trace_bline(vpb1, rsb1, reb1, rbsb1, rbeb1, length0, twist0, .false., 1.)
+	call trace_bline(vpb2, rsb2, reb2, rbsb2, rbeb2, length0, twist0, .false., 1.)
+	
+	if ((rbs .eq. rbsa1) .and. (rbs .eq. rbsa2) .and. &
+	    (rbs .eq. rbsb1) .and. (rbs .eq. rbsb2) .and. &
+	    (rbe .eq. rbea1) .and. (rbe .eq. rbea2) .and. &
+	    (rbe .eq. rbeb1) .and. (rbe .eq. rbeb2)) then
+		tangent_success=.true.
+  
+		sxx = rsa1(s_index1)-rsa2(s_index1)
+		syx = rsa1(s_index2)-rsa2(s_index2)
+		sxy = rsb1(s_index1)-rsb2(s_index1)
+		syy = rsb1(s_index2)-rsb2(s_index2)
+		exx = rea1(e_index1)-rea2(e_index1)
+		eyx = rea1(e_index2)-rea2(e_index2)
+		exy = reb1(e_index1)-reb2(e_index1)
+		eyy = reb1(e_index2)-reb2(e_index2)
+	
+		nxx =  exx*syy - exy*syx
+		nxy = -exx*sxy + exy*sxx
+		nyx =  eyx*syy - eyy*syx
+		nyy = -eyx*sxy + eyy*sxx
+			
+		q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta_cs)**4.)
+		
+	endif
+
+	if (.not. tangent_success) then
+		call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
+		q(i,j)=q0
+	endif
 	return
 endif
-!--------------------------------------------
-n_solved=0
-if (any(sudoku .eq. 0)) then
-	if (brute_force) then
-		!brute force
-		call try_sudoku(1, sudoku)
-	else
-		!logical strategies
-		call initialize_candidate(sudoku, candidate)
-		call process(candidate, bug_flag)
-		if (.not. bug_flag)	call try_candidate(candidate, bug_flag)
-	endif
-else
-	n_solved=1
+!----------------------------------------------------------------------------
+!some problematic sites are filled with trace_scott
+if ((.not. tangent_Flag(i,j) .and.                                       &
+	 (((i .gt.    0) .and. tangent_Flag(i-1, j)) .or.                &
+	  ((i .lt. q1m1) .and. tangent_Flag(i+1, j)) .or.                &
+	  ((j .gt.    0) .and. tangent_Flag(i, j-1)) .or.                &
+	  ((j .lt. q2m1) .and. tangent_Flag(i, j+1)) .or. .not. bkey))) then
+	call ij2vp(i, j, vp)
+	call trace_scott(vp, q0, q_perp0, rs, re, rbs, rbe, length0, twist0, .false.)
+	q(i,j)=q0
+ 	return
 endif
-!-------------------------------------------
-if (n_solved .lt. solved_max .and. verbose) then
-	select case (n_solved)
-	case(0)
-		write(*,"('  == it do not have any solution ==')")
-	case(1)	
-		write(*,"('  == it has a unique solution ==')")
-	case default
-		write(*,"('  == it has ', i0,' solutions ==')") n_solved
-	end select
-endif
-!--------------------------------------------
-end subroutine resolve
+!----------------------------------------------------------------------------
+if (bkey) then
+!use the cross section to calculate Q
 
+	if (bkeys11) sign_s_index1= 1; if (bkeys12) sign_s_index1=-1
+	if (bkeys21) sign_s_index2= 1; if (bkeys22) sign_s_index2=-1
+	if (bkeye11) sign_e_index1= 1; if (bkeye12) sign_e_index1=-1
+	if (bkeye21) sign_e_index2= 1; if (bkeye22) sign_e_index2=-1
 
-subroutine process(candidate, bug_flag)
-implicit none
-integer::no_update_times, n_candidate, n_candidate0
-logical::candidate(9,9,9), bug_flag
-!--------------------------------------------
-no_update_times=0
-n_candidate0=count(candidate)
-do while(count(candidate)>81)
-	call strategy(no_update_times+1, candidate, bug_flag)	
-	if (bug_flag) return
-	
-	n_candidate=count(candidate)	
-	if(n_candidate0==n_candidate) then
-		no_update_times=no_update_times+1
-		if (no_update_times==3) return
-	else
-		n_candidate0=n_candidate
-		no_update_times=0
+	if (bkeys1) then
+		sxx = rsF(s_index1, i+1, j)-rsF(s_index1, i-1, j)
+		syx = rsF(s_index2, i+1, j)-rsF(s_index2, i-1, j)
+	else if (bkeys11 .or. bkeys12) then 
+		sxx = (-3*rsF(s_index1, i, j)+4*rsF(s_index1, i+sign_s_index1, j)- &
+		          rsF(s_index1, i+2*sign_s_index1, j))*sign_s_index1
+		syx = (-3*rsF(s_index2, i, j)+4*rsF(s_index2, i+sign_s_index1, j)- &
+		          rsF(s_index2, i+2*sign_s_index1, j))*sign_s_index1
 	endif
-enddo
-end subroutine process
+
+	if (bkeys2) then
+		sxy = rsF(s_index1, i, j+1)-rsF(s_index1, i, j-1)
+		syy = rsF(s_index2, i, j+1)-rsF(s_index2, i, j-1)
+	else if (bkeys21 .or. bkeys22) then 
+		sxy = (-3*rsF(s_index1, i, j)+4*rsF(s_index1, i, j+sign_s_index2)- &
+		          rsF(s_index1, i, j+2*sign_s_index2))*sign_s_index2
+		syy = (-3*rsF(s_index2, i, j)+4*rsF(s_index2, i, j+sign_s_index2)- &
+		          rsF(s_index2, i, j+2*sign_s_index2))*sign_s_index2
+	endif
+
+	if (bkeye1) then
+		exx = reF(e_index1, i+1, j)-reF(e_index1, i-1, j)
+		eyx = reF(e_index2, i+1, j)-reF(e_index2, i-1, j)
+	else if (bkeye11 .or. bkeye12) then 
+		exx = (-3*reF(e_index1, i, j)+4*reF(e_index1, i+sign_e_index1, j)- &
+		          reF(e_index1, i+2*sign_e_index1, j))*sign_e_index1
+		eyx = (-3*reF(e_index2, i, j)+4*reF(e_index2, i+sign_e_index1, j)- &
+		          reF(e_index2, i+2*sign_e_index1, j))*sign_e_index1
+	endif
+
+	if (bkeye2) then
+		exy = reF(e_index1, i, j+1)-reF(e_index1, i, j-1)
+		eyy = reF(e_index2, i, j+1)-reF(e_index2, i, j-1)
+	else if (bkeye21 .or. bkeye22) then 
+		exy = (-3*reF(e_index1, i, j)+4*reF(e_index1, i, j+sign_e_index2)- &
+		          reF(e_index1, i, j+2*sign_e_index2))*sign_e_index2
+		eyy = (-3*reF(e_index2, i, j)+4*reF(e_index2, i, j+sign_e_index2)- &
+		          reF(e_index2, i, j+2*sign_e_index2))*sign_e_index2
+	endif
+
+	nxx =  exx*syy - exy*syx
+	nxy = -exx*sxy + exy*sxx
+	nyx =  eyx*syy - eyy*syx
+	nyy = -eyx*sxy + eyy*sxx
+
+	q(i,j)=(nxx*nxx+nxy*nxy+nyx*nyx+nyy*nyy)*bnr(i,j)/((2.*delta)**4.)
+endif
+
+end subroutine qcs_calculate
 
 
-subroutine strategy(n, candidate, bug_flag)
-!https://www.sudokuwiki.org/strategy_families
-!n=1, basic
-!n=2, naked pairs, hidden pairs
-!n=3, naked triples, hidden triples
+subroutine qcs()
+use qfactor_common
 implicit none
-integer::k, n, m, way, group(9), i_group, c9n, i_combination
-integer::i_series(9), j_series(9), indgen(9)=(/1,2,3,4,5,6,7,8,9/)
-logical::candidate(9,9,9), candidates(9), positions(9), bug_flag
-!--------------------------------------------
-call combination_number(9, n, c9n)
-do i_combination=1,c9n	
-	call combination_group(n, group, i_combination)
-do way=1,3
-do k=1,9
-!--------------------------------------------
-!if n positions have only n candidates
-	call ij_series(k, way, group, i_series, j_series)
-	candidates=candidate(:, i_series(1), j_series(1))	
-	do i_group=2,n		
-		candidates=candidates .or. candidate(:,i_series(i_group),j_series(i_group))	
+integer:: i, j
+!----------------------------------------------------------------------------
+
+!$OMP PARALLEL DO PRIVATE(i,j), schedule(DYNAMIC)	
+	DO j= 0, q2m1
+	DO i= 0, q1m1 
+		call  qcs_bridge(i,j)
 	enddo
-	
-	bug_flag=count(candidates) .lt. n
-	if(bug_flag) return	
-	
-	if (count(candidates) .eq. n) then
-		do i_group=n+1,9
-			where(candidates) candidate(:,i_series(i_group),j_series(i_group))=.false.
-		enddo
-	endif	
-!--------------------------------------------
-!if n candidates found in only n positions
-	call ij_series(k, way, indgen, i_series, j_series)
-	forall(m=1:9) positions(m)=any(candidate(group(1:n), i_series(m), j_series(m)))
-	
-	bug_flag=count(positions) .lt. n
-	if(bug_flag) return
-	
-	if (count(positions) .eq. n) &
-	forall(m=1:9, positions(m)) candidate(group(n+1:9), i_series(m), j_series(m))=.false.
-!--------------------------------------------
-enddo
-enddo
-enddo
-call check_candidate(candidate, bug_flag)
-end subroutine strategy
-
-
-recursive subroutine try_candidate(candidate, bug_flag)
-use share
-implicit none
-integer::sudoku(9,9), candidate_first, m, k, i, j, n_solved0, n_guess
-logical::candidate(9,9,9), candidate_try(9,9,9), bug_flag
-!--------------------------------------------
-100 continue
-
-if (count(candidate) .le. 81) then
-	call check_candidate(candidate, bug_flag)
-	if (bug_flag) return
-	forall(i=1:9,j=1:9)	sudoku(i,j)=findloc(candidate(:,i,j),.true.,1)
-	n_solved=n_solved+1
-	if (verbose) call print_sudoku(sudoku)
-	return
-endif
-!--------------------------------------------
-do n_guess=2,9
-do j=1,9
-do i=1,9
-if (count(candidate(:,i,j)) .eq. n_guess) then	
-	do m=0,8
-		if (candidate(mod(m+m_shift(i,j),9)+1,i,j)) then
-			candidate_first=mod(m+m_shift(i,j),9)+1
-			exit
-		endif	
 	enddo
-	candidate_try=candidate
-	candidate_try(:,i,j)=.false.
-	candidate_try(candidate_first,i,j)=.true.
-	call process(candidate_try, bug_flag)
-	
-	n_solved0=n_solved
-	if (.not. bug_flag)	call try_candidate(candidate_try, bug_flag)
-	
-	if (n_solved .eq. solved_max) then
-		candidate=candidate_try
-		return
-	endif
-		
-	if (bug_flag .or. n_solved>n_solved0) then
-		candidate(candidate_first,i,j)=.false.
-		call process(candidate, bug_flag)
-		
-		if (bug_flag) then
-			return
-		else
-			goto 100
-		endif
-	endif
-endif 
-enddo
-enddo
-enddo
-end subroutine try_candidate
+!$OMP END PARALLEL DO
 
-
-recursive subroutine try_sudoku(ij, sudoku)
-use share
-implicit none
-integer::sudoku(9,9), sudoku_try(9,9), ij, i, j, m, m0
-logical::ij_mark(0:9)
-integer::neighbor_i(2), neighbor_j(2)
-!--------------------------------------------
-if (ij .eq. 82) then
-	n_solved=n_solved+1
-	if (verbose) call print_sudoku(sudoku)
-	return
-endif
-!--------------------------------------------
-j=(ij-1)/9+1
-i=mod(ij-1,9)+1
-if(sudoku(i,j)==0)then
-	sudoku_try=sudoku
-
-	ij_mark=.false.
-	ij_mark(sudoku(:,j))=.true.
-	ij_mark(sudoku(i,:))=.true.
-	call i_neighbor(i,neighbor_i)
-	call i_neighbor(j,neighbor_j)
-	ij_mark(sudoku(neighbor_i,neighbor_j(1)))=.true.
-	ij_mark(sudoku(neighbor_i,neighbor_j(2)))=.true.
-
-	do m0=0,8
-	
-		m= mod(m0+m_shift(i,j),9)+1
-		if (ij_mark(m)) cycle
-
-		sudoku_try(i,j)=m
-		call try_sudoku(ij+1, sudoku_try)
-		
-		if (n_solved .eq. solved_max) then
-			sudoku=sudoku_try
-			return
-		endif
+if (.not. scottFlag) then
+!$OMP PARALLEL DO PRIVATE(i,j), schedule(DYNAMIC)
+	DO j= 0, q2m1
+	DO i= 0, q1m1
+		call  qcs_calculate(i,j)
 	enddo
-else
-	call try_sudoku(ij+1, sudoku)
+	enddo
+!$OMP END PARALLEL DO
 endif
-end subroutine try_sudoku
+
+call qmin2()
+
+end subroutine qcs
 
 
-subroutine i_neighbor(i, neighbor)
+subroutine ij2vp(i, j, vp)
+use qfactor_common
 implicit none
-integer::i, neighbor(2)
-select case(i)
-case(1)
-	neighbor=[2,3]
-case(2)
-	neighbor=[1,3]
-case(3)
-	neighbor=[1,2]
-case(4)
-	neighbor=[5,6]
-case(5)
-	neighbor=[4,6]
-case(6)
-	neighbor=[4,5]
-case(7)
-	neighbor=[8,9]
-case(8)
-	neighbor=[7,9]
-case(9)
-	neighbor=[7,8]
+integer:: i, j
+real:: vp(0:2)
+!----------------------------------------------------------------------------
+select case(Normal_index)
+	case(-1) ! csFlag
+		vp=point0+dble(i*delta)*ev1+dble(j*delta)*ev2
+	case(0) 				
+		vp=[ cut_coordinate, i*delta+yreg(0), j*delta+zreg(0)]
+	case(1) 
+		vp=[i*delta+xreg(0),  cut_coordinate, j*delta+zreg(0)]
+	case(2) 
+		vp=[i*delta+xreg(0), j*delta+yreg(0),  cut_coordinate]
 end select
-end subroutine i_neighbor
+end subroutine ij2vp
 
 
-subroutine eliminate(sudoku)
-use share
+subroutine qmin2()
+use qfactor_common
 implicit none
-integer::sudoku(9,9), sudoku_try(9,9), &
-ij0, ij, ij_shift, i, j, n_eliminated
-logical::tested_mark(9,9), bug_flag 
-real::x
-character(len=2)::n_eliminated_str
-character(len=1)::plural_suffix
-character(len=127)::file_saved
-!--------------------------------------------
-n_eliminated=0
-tested_mark=.false.
-solved_max=2
-verbose=.false.
-!--------------------------------------------
-200 continue
+!----------------------------------------------------------------------------
+where(q .lt. 2.0) q=2.0
+if (scottFlag) where (q_perp .lt. 2.0) q_perp=2.0
 
-call random_seed()
-call random_number(x)
-ij_shift=floor(x*81)
-!--------------------------------------------
-do ij0=0,80
-	ij=mod(ij0+ij_shift,81)
-	j=ij/9+1
-	i=mod(ij,9)+1
+end subroutine qmin2
 
-	sudoku_try=sudoku	
-	if (sudoku(i,j) .gt. 0 .and. .not. tested_mark(i,j)) then	
-		tested_mark(i,j)=.true.	
-		sudoku_try(i,j)=0
-		call resolve(sudoku_try)
-		if (n_solved .eq. 1) then
-			sudoku(i,j)=0
-			n_eliminated=n_eliminated+1
-			if(n_eliminated .eq. eliminated_max) exit
-			goto 200
-		endif
-	endif
-enddo
-!--------------------------------------------
-if (n_eliminated .eq. 0) then
-	print*, ' == no element can be eliminated =='
-	return
-endif
-!--------------------------------------------
-write(n_eliminated_str,"(i0)") n_eliminated
-if (n_eliminated .eq. 1) then 
-	plural_suffix=""
-else
-	plural_suffix="s"
-endif
 
-print*, ' == eliminate '//trim(n_eliminated_str)&
-//' element'//trim(plural_suffix)//' =='
+subroutine out_slogq()
+use qfactor_common
+implicit none
+real, allocatable:: slogq(:,:)
+!----------------------------------------------------------------------------
+allocate(slogq(0:q1m1, 0:q2m1))
+slogq=sign2d*log10(q)
 
-n_solved=0
-call print_sudoku(sudoku)
-!--------------------------------------------
-if (outfile) then
-	file_saved=trim(filename)//'_eliminate'//trim(n_eliminated_str)//'.txt'
-	print*, trim(file_saved)//' is saved'
-	open(unit=8, file=trim(file_saved), status='replace')
-	write(8, '(9i2)') ((sudoku(i,j),i=1,9),j=1,9)
+open(unit=8, file='slogq.bin', access='stream', status='replace')
+write(8) slogq
+ close(8)
+
+if (scottFlag) then 
+	slogq=sign2d*log10(q_perp)
+	open(unit=8, file='slogq_perp.bin', access='stream', status='replace')
+	write(8) slogq
 	close(8)
 endif
-end subroutine eliminate
+
+deallocate(slogq, sign2d)
+
+end subroutine out_slogq
 
 
-subroutine initialize_candidate(sudoku, candidate)
+subroutine show_time(percent)
 implicit none
-integer::sudoku(9,9), i, j
-logical::candidate(9,9,9)
-!--------------------------------------------
-candidate=.true.
-
-do j=1,9
-do i=1,9
-	if (sudoku(i,j)>0) then
-		candidate(:,i,j)=.false.
-		candidate(sudoku(i,j),i,j)=.true.
-	endif
-enddo
-enddo
-end subroutine initialize_candidate
+real:: percent
+integer:: times(8)
+!----------------------------------------------------------------------------
+call date_and_time(VALUES=times)	
+print 600, percent, times(5), times(6), times(7)
+600 format( '         ', F6.2, '%        ' ,I2.2, ':', I2.2, ':', I2.2)
+end subroutine show_time
 
 
-subroutine check_candidate(candidate, bug_flag)
+program qfactor
+use trace_common
+use qfactor_common
+use field_common
 implicit none
-integer::k, m, i0, j0
-logical::candidate(9,9,9), bug_flag
-!--------------------------------------------
-do k=1,9
-	j0=(k-1)/3*3+1
-	i0=mod(k-1,3)*3+1
-do m=1,9
-	!check no any candidate in a cell
-	bug_flag= .not. (any(candidate(:,m,k)) .and. & 
-	!check the candidate m lacked in a unit
-	any(candidate(m,k,:)) .and. any(candidate(m,:,k)) .and. any(candidate(m,i0:i0+2,j0:j0+2)))
-	if(bug_flag) return
-enddo
-enddo
-end subroutine check_candidate
+integer:: k, k0
+!----------------------------------------------------------------------------
+call initialize()
 
-
-subroutine check_sudoku(sudoku, bug_flag)
-implicit none
-integer::sudoku(9,9), k, m, i0, j0
-logical::bug_flag
-!--------------------------------------------
-do k=1,9
-	j0=(k-1)/3*3+1
-	i0=mod(k-1,3)*3+1
-do m=1,9
-	bug_flag=count(sudoku(k,:) .eq. m)>1 .or. & 
-	         count(sudoku(:,k) .eq. m)>1 .or. & 
-	         count(sudoku(i0:i0+2,j0:j0+2) .eq. m)>1
-	if(bug_flag) return
-enddo
-enddo
-end subroutine check_sudoku
-
-
-subroutine print_sudoku(sudoku)
-use share
-implicit none
-integer:: sudoku(9,9), i, j
-character(len=30)::row_str, divide_str
-character(len=19)::n_solved_str
-character(len=127)::file_saved
-!--------------------------------------------
-if (n_solved .gt. 0) then
-	write(n_solved_str,"(i0)") n_solved
-	if(outfile) then
-		file_saved=trim(filename)//'_solution'//trim(n_solved_str)//'.txt'
-		print*, ' == solution '//trim(n_solved_str)//' == '//trim(file_saved)//' is saved'
-		open(unit=8, file=trim(file_saved), status='replace')
-		write(8, '(9i2)') ((sudoku(i,j),i=1,9),j=1,9)
+print*, '  _____________________________________'
+print*, '        schedule         time'
+call show_time(0.0)
+!----------------------------------------------------------------------------
+if (q0flag) then 	
+	call qfactor0()
+	rboundary_tmp=reboundary(0:q1m1, 0:q2m1) ! For avoiding segmentation fault of IO
+	open(unit=8, file='qfactor0.bin', access='stream', status='replace')
+	write(8) q, length, Bnr, reF, rboundary_tmp
+	close(8)
+	
+	if (twistFlag) then
+		open(unit=8, file='twist.bin', access='stream', status='replace')
+		write(8) twist
 		close(8)
+	endif
+	
+	if (scottFlag) then	
+		open(unit=8, file='q_perp.bin', access='stream', status='replace')
+		write(8) q_perp
+		close(8)		
+	endif
+endif
+!----------------------------------------------------------------------------
+if (cflag) then	
+	call qcs()
+	open(unit=8, file='qcs.bin', access='stream', status='replace')
+	write(8) q, length, rsF, reF
+	rboundary_tmp=rsboundary(0:q1m1, 0:q2m1) ! For avoiding segmentation fault of IO
+	write(8) rboundary_tmp
+	rboundary_tmp=reboundary(0:q1m1, 0:q2m1) ! For avoiding segmentation fault of IO
+	write(8) rboundary_tmp
+	close(8)
+	 	
+	if (twistFlag) then
+		open(unit=8, file='twist.bin', access='stream', status='replace')
+		write(8) twist
+		close(8)
+	endif
+	 	
+	if (scottFlag) then	
+		open(unit=8, file='q_perp.bin', access='stream', status='replace')
+		write(8) q_perp
+		close(8)		
+	endif
+endif
+!----------------------------------------------------------------------------	
+if (vflag) then
+	open(unit=1, file='q3d.bin', access='stream', status='replace')
+	open(unit=2, file='rboundary3d.bin', access='stream', status='replace')
+	if(scottFlag) open(unit=3, file='q_perp3d.bin', access='stream', status='replace')
+	if(twistFlag) open(unit=4, file= 'twist3d.bin', access='stream', status='replace')
+	if (zreg(0) .eq. zmin) then
+		call qfactor0()
+		write(1) q
+		write(2) rboundary_tmp
+		if (scottFlag) write(3) q_perp
+		if (twistFlag) write(4) twist
+		k0=1
 	else
-		print*, ' == solution '//trim(n_solved_str)//' == '
+		k0=0
 	endif
-endif
-
-divide_str='       ------+-------+------'
-do j=1,9
-	write(row_str,"(6x, 3i2,' |',3i2,' |',3i2)") (sudoku(i,j),i=1,9)
-	do i=8,30
-		if (row_str(i:i) .eq. '0') row_str(i:i)='.'
+				
+	do k=k0, qz-1			
+		cut_coordinate=zreg(0)+k*delta
+		call qcs()
+		write(1) q
+		write(2) rboundary_tmp
+		if (scottFlag) write(3) q_perp
+		if (twistFlag) write(4) twist
+	
+		if (mod(k+1, 4) .eq. 0) call show_time(float(k+1)/qz*100.0)
 	enddo
-	write(*,*) row_str	
-	if (j==3 .or. j==6) write(*,*) divide_str
-enddo
-end subroutine print_sudoku
-
-
-subroutine ij_series(k, way, group, i_series, j_series)
-integer::k, way, group(9), i_series(9), j_series(9)
-!--------------------------------------------
-select case(way)
-case(1)
-	i_series=k; j_series=group
-case(2)	
-	i_series=group; j_series=k
-case(3)
-	j_series=((k-1)/3)*3+1+(group-1)/3
-	i_series=(mod(k-1,3))*3+1+mod(group-1,3)
-end select
-end subroutine ij_series
-
-
-subroutine combination_number(m, n, cmn)
-implicit none
-!integer::i
-integer::m, n, cmn
-!--------------------------------------------
-!m=9
-if (n .eq. 1 .or. n .eq. 8) cmn=9
-if (n .eq. 2 .or. n .eq. 7) cmn=36
-if (n .eq. 3 .or. n .eq. 6) cmn=84
-if (n .eq. 4 .or. n .eq. 5) cmn=126
-! cmn=m-n+1
-!do i=m-n+2,m
-!	cmn=cmn*i
-!enddo
-!do i=2,n
-!	cmn=cmn/i
-!enddo
-end subroutine combination_number
-
-
-subroutine combination_group(n, group, i)
-implicit none
-integer::i, j, k, n, group(9), step
-!--------------------------------------------
-do k=1,9
-	group(k)=k
-enddo
-
-do step=2,i
-	call group_plus1(group, n, n)
-enddo
-
-do k=n+1,9
-do j=1,k-1
-	if (all(j .ne. group(1:k-1))) then 
-		group(k)=j
-		exit
-	endif
-enddo
-enddo
-end subroutine combination_group
-
-
-recursive subroutine group_plus1(group, k, n)
-implicit none
-integer::group(9), k, n
-!--------------------------------------------	
-if (group(k) .lt. 9-n+k) then
-	group(k)=group(k)+1
-else
-	if (k .eq. 1) return
-	call group_plus1(group, k-1, n)
-	group(k)=group(k-1)+1
+	close(1)
+	close(2)
+	if (scottFlag) close(3)
+	if (twistFlag) close(4)
 endif
-end subroutine group_plus1
+!----------------------------------------------------------------------------
+deallocate(Bfield, q, reF, length, bnr, reboundary, rboundary_tmp)
+if ( twistFlag) deallocate(twist, curlB)
+if ( scottFlag) deallocate(q_perp)
+if (grad3DFlag) deallocate(grad_unit_vec_Bfield)
+if (cflag .or. vflag) deallocate(rsF, rsboundary, tangent_Flag)
+if (stretchFlag) then	
+	deallocate(xa, ya, za, dxa, dya, dza)
+	vp_index => null ()
+	if (.not. uni_stretch_Flag) deallocate(binary_values)
+endif
+round_weight        => null ()
+ curlB_grid         => null ()
+grad_unit_vec_B_grid=> null ()
+!----------------------------------------------------------------------------
+if (.not. (vflag .and. (mod(qz, 4) .eq. 0))) call show_time(100.0)
+
+end program qfactor
