@@ -333,6 +333,10 @@ if save_curlB then begin
 	
 	save, filename=file_curlB, curlBx, curlBy, curlBz, compress=compress
 	print, "curlB is saved in '"+file_curlB+"'"
+ 
+	file_delete, tmp_dir, /recursive
+	free_lun, unit, /force
+ 
 	return
 endif
 ;----------------------------------------------------------------------------------------------
