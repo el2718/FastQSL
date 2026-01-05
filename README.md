@@ -31,7 +31,7 @@ If you used one of the binary packages available for Linux, then it depends on t
 export GDL_PATH=/usr/share/gnudatalanguage/lib 
 
 ### For *.f90
-* gfortran https://gcc.gnu.org/wiki/GFortran or
+* gfortran https://fortran-lang.org/learn/os_setup/install_gfortran/ or
 * ifort https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran
   * note: please append this line to ~/.bashrc   
   source /opt/intel/oneapi/setvars.sh intel64
