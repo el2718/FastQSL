@@ -11,10 +11,11 @@ This module is licensed under a
 [cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
 [cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
 
-
 Since the server of http://staff.ustc.edu.cn/~rliu/qfactor.html will stop, those codes will be updated on this site from July 2022.
 
-A GPU version is also provided https://github.com/peijin94/FastQSL.
+A GPU version is also provided https://github.com/peijin94/FastQSL
+
+An upgraded version is provided https://github.com/el2718/FastQSL2
 
 -----------------------------
 ## Dependencies
